@@ -156,6 +156,30 @@
   .task-item:hover .task-edit-btn { opacity: 0.75; }
   .task-edit-btn:hover { opacity: 1 !important; }
 
+  /* 导出数据区域 */
+  .export-area {
+    padding: 8px 14px 12px;
+    border-top: 1px solid #f0f0f0;
+    flex-shrink: 0;
+  }
+  .export-btn {
+    width: 100%;
+    padding: 7px;
+    background: #f7f7f7;
+    color: #666;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: inherit;
+  }
+  .export-btn:hover {
+    background: #eee;
+    color: #333;
+    border-color: #ccc;
+  }
+
   /* 进度条 */
   .progress-wrap { margin-top: 6px; padding-left: 24px; }
   .progress-meta { display: flex; justify-content: space-between; font-size: 11px; color: #999; margin-bottom: 3px; }
@@ -870,10 +894,15 @@
         <input type="date" id="newTaskDeadline" style="flex:1;" />
       </div>
       <textarea id="newTaskNote" placeholder="备注（可选）..." style="min-height:38px;font-size:13px;border:1.5px solid #e8e8e8;border-radius:8px;padding:7px 10px;resize:vertical;outline:none;" onfocus="this.style.borderColor='#667eea'" onblur="this.style.borderColor='#e8e8e8'"></textarea>
-      <button class="add-btn" onclick="addMainTask()">＋ 添加 Plan</button>
+      <button class="add-btn" onclick="addMainTask()">＋ 添加</button>
     </div>
 
     <div class="task-list" id="mainTaskList"></div>
+
+    <!-- 导出数据按钮 -->
+    <div class="export-area">
+      <button class="export-btn" onclick="exportData()">导出数据</button>
+    </div>
 
   </aside>
 
@@ -970,13 +999,10 @@
         <div class="dv-pool-title">📥 任务池</div>
         <!-- 添加任务到任务池的表单 -->
         <div class="dv-pool-add-form" id="dvPoolAddForm">
+          <!-- 任务名称（必填，Enter 快捷提交） -->
           <input type="text" id="dvPoolNewName" placeholder="任务名称..." class="dv-pool-input"
             onkeydown="if(event.key==='Enter')addDvPoolTask()" />
-          <select id="dvPoolNewLevel" class="dv-pool-select">
-            <option value="red">🔴</option>
-            <option value="yellow" selected>🟡</option>
-            <option value="green">🟢</option>
-          </select>
+          <!-- 绑定 Plan（可选） -->
           <select id="dvPoolNewPlan" class="dv-pool-select" style="font-size:10px;"></select>
           <button class="dv-pool-add-btn" onclick="addDvPoolTask()">+ 加入</button>
         </div>
@@ -3051,7 +3077,8 @@ function addDvPoolTask() {
   const name = nameEl ? nameEl.value.trim() : '';
   if (!name) { nameEl && nameEl.focus(); return; }
 
-  const level = document.getElementById('dvPoolNewLevel').value || 'yellow';
+  // 任务池默认黄色重要性，拖入时间轴后再正式设定
+  const level = 'yellow';
   const planSel = document.getElementById('dvPoolNewPlan');
   const mainTaskId = planSel && planSel.value ? parseInt(planSel.value) : null;
 
@@ -3206,6 +3233,43 @@ function confirmPoolSchedule() {
 
   closePoolSchedule();
   saveData(); render(); refreshDayViewIfOpen();
+}
+
+// ==================== 导出数据 ====================
+/**
+ * 将当前 localStorage 中的所有数据导出为 JSON 文件并自动下载
+ * 文件名格式：lightplanner-YYYY-MM-DD.json
+ */
+function exportData() {
+  try {
+    const data = {
+      version: 'calendar_v4',
+      exportAt: new Date().toISOString(),
+      mainTasks,
+      calTasks,
+      taskPool,
+      nextId,
+      currentYear,
+      currentMonth
+    };
+    const json   = JSON.stringify(data, null, 2);
+    const blob   = new Blob([json], { type: 'application/json' });
+    const url    = URL.createObjectURL(blob);
+    const a      = document.createElement('a');
+    const now    = new Date();
+    const y      = now.getFullYear();
+    const m      = String(now.getMonth() + 1).padStart(2, '0');
+    const d      = String(now.getDate()).padStart(2, '0');
+    a.href       = url;
+    a.download   = `lightplanner-${y}-${m}-${d}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    showToast('✅ 数据导出成功', '#52c41a');
+  } catch(e) {
+    alert('导出失败：' + e.message);
+  }
 }
 
 // ==================== 数据持久化 ====================
