@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>人生规划月历</title>
+<title>Light Planner</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
@@ -28,6 +28,14 @@
     cursor: pointer; font-size: 14px; transition: all 0.2s;
   }
   .nav-btns button:hover { background: rgba(255,255,255,0.35); }
+  /* 今日按钮：使用实色背景突出显示 */
+  .btn-today {
+    background: rgba(255,255,255,0.45) !important;
+    border-color: rgba(255,255,255,0.8) !important;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+  }
+  .btn-today:hover { background: rgba(255,255,255,0.65) !important; }
   .month-title { font-size: 18px; font-weight: 600; min-width: 140px; text-align: center; }
   .header-tip { font-size: 12px; opacity: 0.8; }
 
@@ -139,6 +147,14 @@
   .task-note { font-size: 11px; color: #aaa; margin-top: 2px; padding-left: 24px; }
   .task-del { color: #ccc; cursor: pointer; font-size: 16px; transition: color 0.2s; flex-shrink: 0; line-height: 1; }
   .task-del:hover { color: #ff4d4f; }
+  /* Plan 编辑按钮 */
+  .task-edit-btn {
+    font-size: 13px; cursor: pointer; opacity: 0.3;
+    transition: opacity 0.2s; flex-shrink: 0; line-height: 1;
+    margin-right: 3px;
+  }
+  .task-item:hover .task-edit-btn { opacity: 0.75; }
+  .task-edit-btn:hover { opacity: 1 !important; }
 
   /* 进度条 */
   .progress-wrap { margin-top: 6px; padding-left: 24px; }
@@ -529,6 +545,153 @@
     .task-panel { position: static; max-height: 420px; }
   }
 
+  /* ===== Task Pool 待安排任务池 ===== */
+  .pool-panel {
+    background: white; border-radius: 16px;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.08); overflow: hidden;
+    position: sticky; top: 70px; max-height: calc(100vh - 86px);
+    display: flex; flex-direction: column;
+  }
+  .pool-header {
+    background: linear-gradient(135deg, #43b89c 0%, #2a9d8f 100%);
+    color: white; padding: 10px 18px; font-size: 14px; font-weight: 700;
+    display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  }
+  .pool-add-form {
+    padding: 10px 14px; border-bottom: 1px solid #f0f0f0;
+    display: flex; gap: 6px; align-items: center;
+  }
+  .pool-add-form input {
+    flex: 1; padding: 6px 10px; border: 1.5px solid #e8e8e8;
+    border-radius: 8px; font-size: 13px; outline: none; font-family: inherit;
+  }
+  .pool-add-form input:focus { border-color: #43b89c; }
+  .pool-add-form select {
+    padding: 6px 6px; border: 1.5px solid #e8e8e8; border-radius: 8px;
+    font-size: 12px; outline: none; font-family: inherit;
+  }
+  .pool-add-form select:focus { border-color: #43b89c; }
+  .pool-add-form button {
+    background: linear-gradient(135deg, #43b89c, #2a9d8f);
+    color: white; border: none; padding: 6px 12px; border-radius: 8px;
+    font-size: 13px; cursor: pointer; font-weight: 600; transition: opacity 0.2s;
+    white-space: nowrap;
+  }
+  .pool-add-form button:hover { opacity: 0.88; }
+  .pool-list {
+    flex: 1; overflow-y: auto; padding: 8px 12px;
+  }
+  .pool-list::-webkit-scrollbar { width: 4px; }
+  .pool-list::-webkit-scrollbar-thumb { background: #d0d0d0; border-radius: 3px; }
+  .pool-item {
+    display: flex; align-items: center; gap: 6px;
+    padding: 7px 10px; border-radius: 8px; margin-bottom: 5px;
+    background: #f7faf9; border-left: 3px solid #43b89c;
+    cursor: grab; transition: all 0.2s; user-select: none;
+  }
+  .pool-item:hover { background: #e8f5f2; transform: translateX(2px); }
+  .pool-item.dragging { opacity: 0.35; cursor: grabbing; }
+  .pool-item.level-red    { border-left-color: #ff4d4f; }
+  .pool-item.level-yellow { border-left-color: #c49900; }
+  .pool-item.level-green  { border-left-color: #52c41a; }
+  .pool-item-name { font-size: 12px; flex: 1; line-height: 1.4; color: #333; }
+  .pool-item-del { color: #ccc; font-size: 13px; cursor: pointer; padding: 0 2px; flex-shrink: 0; }
+  .pool-item-del:hover { color: #ff4d4f; }
+  .pool-empty { text-align: center; color: #bbb; padding: 20px 0; font-size: 12px; }
+
+  /* 日视图左侧布局（任务池 + 时间轴） */
+  .dayview-modal {
+    width: 800px !important;
+  }
+  .dayview-body {
+    display: flex; gap: 0; padding: 0 !important;
+  }
+  .dv-pool-col {
+    width: 185px; flex-shrink: 0; border-right: 1px solid #eee;
+    padding: 10px 8px; overflow-y: auto;
+    min-height: 400px;
+  }
+  .dv-pool-col::-webkit-scrollbar { width: 4px; }
+  .dv-pool-col::-webkit-scrollbar-thumb { background: #e0e0e0; border-radius: 3px; }
+  .dv-pool-title {
+    font-size: 11px; font-weight: 700; color: #2a9d8f;
+    letter-spacing: 0.5px; margin-bottom: 8px; text-transform: uppercase;
+  }
+  .dv-pool-item {
+    padding: 6px 8px; border-radius: 7px; margin-bottom: 5px;
+    background: #f0faf8; border-left: 3px solid #43b89c;
+    font-size: 11px; color: #333; cursor: grab;
+    transition: all 0.2s; user-select: none; line-height: 1.4;
+  }
+  .dv-pool-item:hover { background: #d4f0ea; transform: translateX(2px); }
+  .dv-pool-item.dragging { opacity: 0.35; cursor: grabbing; }
+  .dv-pool-item.level-red    { border-left-color: #ff4d4f; background: #fff5f5; }
+  .dv-pool-item.level-yellow { border-left-color: #c49900; background: #fffde8; }
+  .dv-pool-item.level-green  { border-left-color: #52c41a; background: #f6ffed; }
+
+  /* 日视图任务池表单 */
+  .dv-pool-add-form {
+    display: flex; flex-direction: column; gap: 4px;
+    margin-bottom: 8px; padding-bottom: 8px;
+    border-bottom: 1px solid #e8f5f2;
+  }
+  .dv-pool-input {
+    width: 100%; padding: 5px 8px;
+    border: 1.5px solid #e8e8e8; border-radius: 6px;
+    font-size: 11px; outline: none; font-family: inherit;
+    color: #333;
+  }
+  .dv-pool-input:focus { border-color: #43b89c; }
+  .dv-pool-select {
+    width: 100%; padding: 4px 6px;
+    border: 1.5px solid #e8e8e8; border-radius: 6px;
+    font-size: 11px; outline: none; font-family: inherit;
+    background: white; color: #333;
+  }
+  .dv-pool-select:focus { border-color: #43b89c; }
+  .dv-pool-add-btn {
+    width: 100%; padding: 5px;
+    background: linear-gradient(135deg, #43b89c, #2a9d8f);
+    color: white; border: none; border-radius: 6px;
+    font-size: 11px; font-weight: 600; cursor: pointer;
+    transition: opacity 0.2s;
+  }
+  .dv-pool-add-btn:hover { opacity: 0.85; }
+
+  /* 日视图任务池 item 删除按钮 */
+  .dv-pool-item-del {
+    color: #ccc; font-size: 12px; cursor: pointer;
+    padding: 0 2px; flex-shrink: 0; line-height: 1;
+  }
+  .dv-pool-item-del:hover { color: #ff4d4f; }
+  .dv-pool-item-plan {
+    font-size: 9px; color: #888; margin-top: 1px;
+    overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
+  }
+  .dv-timeline-col {
+    flex: 1; padding: 12px 16px 20px; overflow-y: auto;
+    min-height: 400px;
+    max-height: calc(100vh - 200px);
+  }
+  .dv-timeline-col::-webkit-scrollbar { width: 5px; }
+  .dv-timeline-col::-webkit-scrollbar-thumb { background: #e0e0e0; border-radius: 3px; }
+
+  /* 任务池放置目标高亮 */
+  .dv-pool-col.drag-over-pool {
+    background: #e8f5f2; outline: 2px dashed #43b89c; outline-offset: -3px;
+  }
+  /* 时间轴放置高亮 */
+  .dv-timeline-col.drag-over { outline: 2px dashed #667eea; outline-offset: -2px; background: rgba(102,126,234,0.04); }
+
+  /* 日程安排弹窗（从任务池拖入时） */
+  .pool-schedule-modal {
+    background: white; border-radius: 14px;
+    padding: 20px; width: 360px; max-width: 95vw;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.18);
+    animation: slideUp 0.25s ease;
+  }
+  .pool-schedule-modal h3 { font-size: 16px; margin-bottom: 14px; color: #333; }
+
   /* ===== 详情弹窗编辑模式 ===== */
   .td-edit-section {
     background: #f7f8fa;
@@ -646,17 +809,29 @@
     background: #e8e8f5;
     color: #667eea;
   }
+
+  /* ===== Toast 通知 ===== */
+  @keyframes toastIn {
+    from { opacity: 0; transform: translateX(-50%) translateY(10px); }
+    to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+  }
+  @keyframes toastOut {
+    from { opacity: 1; }
+    to   { opacity: 0; }
+  }
 </style>
 </head>
 <body>
 
 <!-- 顶部导航 -->
 <div class="header">
-  <h1>📅 人生规划月历</h1>
+  <h1>🗓 Light Planner</h1>
   <div class="nav-btns">
     <button onclick="changeMonth(-1)">‹ 上月</button>
     <span class="month-title" id="monthTitle">2026年4月</span>
     <button onclick="changeMonth(1)">下月 ›</button>
+    <!-- 今日按钮：点击切换到当月并高亮今天 -->
+    <button class="btn-today" onclick="goToToday()" title="回到今天">今日</button>
   </div>
   <div class="header-tip" id="dailyQuote"></div>
 </div>
@@ -669,7 +844,7 @@
     ondragleave="onPanelDragLeave(event)"
     ondrop="onDropToPanel(event)">
 
-    <div class="task-panel-header"><span>📋</span> 总任务区</div>
+    <div class="task-panel-header"><span>🎯</span> MY PLAN</div>
 
     <!-- 颜色图例 -->
     <div class="legend">
@@ -680,7 +855,7 @@
 
     <!-- 添加任务表单 -->
     <div class="add-task-form">
-      <input type="text" id="newTaskName" placeholder="任务名称（如：CSC学习）" />
+      <input type="text" id="newTaskName" placeholder="Plan 名称" />
       <div class="form-row">
         <label>目标(h)：</label>
         <input type="number" id="newTaskTotalHours" placeholder="50" min="0" step="0.5" style="width:70px" />
@@ -690,11 +865,16 @@
           <option value="green">🟢 轻松</option>
         </select>
       </div>
+      <div class="form-row">
+        <label>截止日期：</label>
+        <input type="date" id="newTaskDeadline" style="flex:1;" />
+      </div>
       <textarea id="newTaskNote" placeholder="备注（可选）..." style="min-height:38px;font-size:13px;border:1.5px solid #e8e8e8;border-radius:8px;padding:7px 10px;resize:vertical;outline:none;" onfocus="this.style.borderColor='#667eea'" onblur="this.style.borderColor='#e8e8e8'"></textarea>
-      <button class="add-btn" onclick="addMainTask()">＋ 添加任务</button>
+      <button class="add-btn" onclick="addMainTask()">＋ 添加 Plan</button>
     </div>
 
     <div class="task-list" id="mainTaskList"></div>
+
   </aside>
 
   <!-- ===== 右侧：日历 ===== -->
@@ -723,12 +903,11 @@
     <input type="text" id="modalTaskName" placeholder="输入任务名称..." />
     <label>日期</label>
     <input type="date" id="modalDate" onchange="onModalDateChange()" />
-    <label>时间段（开始 → 结束）</label>
-    <div class="modal-time-range">
-      <select id="modalStartHour"></select>
-      <span>—</span>
-      <select id="modalEndHour"></select>
-    </div>
+    <label>开始时间</label>
+    <select id="modalStartHour" onchange="onModalTimeChange()"></select>
+    <label>时长</label>
+    <select id="modalEndHour" onchange="onModalTimeChange()"></select>
+    <div id="modalTimePreview" style="font-size:11px;color:#888;margin-top:3px;"></div>
     <div id="modalOccupiedHint" style="font-size:11px;color:#999;margin-top:4px;"></div>
     <label>任务等级</label>
     <select id="modalLevel">
@@ -738,6 +917,11 @@
     </select>
     <label>备注</label>
     <textarea id="modalNote" placeholder="备注（可选）..."></textarea>
+    <!-- 绑定 Plan -->
+    <label>绑定 Plan（可选）</label>
+    <select id="modalPlanId">
+      <option value="">— 不绑定 Plan —</option>
+    </select>
     <!-- 子任务输入区域 -->
     <div id="modalSubtaskArea">
       <label style="margin-top:12px;display:flex;align-items:center;justify-content:space-between;">
@@ -770,13 +954,44 @@
 </div>
 
 <!-- 日视图弹窗 -->
-<div class="dayview-overlay" id="dayviewOverlay" ondragover="onDvDragOver(event)" ondragleave="onDvDragLeave(event)" ondrop="onDvDrop(event)">
+<div class="dayview-overlay" id="dayviewOverlay">
   <div class="dayview-modal">
     <div class="dayview-header">
       <span class="dayview-title" id="dayviewTitle">日视图</span>
       <button class="dayview-close" onclick="closeDayView()">×</button>
     </div>
-    <div class="dayview-body" id="dayviewBody"></div>
+    <div class="dayview-body" id="dayviewBody">
+      <!-- 左侧：任务池（仅在日视图中显示） -->
+      <div class="dv-pool-col" id="dvPoolCol"
+        ondragover="onDvPoolDragOver(event)"
+        ondragleave="onDvPoolDragLeave(event)"
+        ondrop="onDvPoolDrop(event)">
+        <!-- 任务池标题 -->
+        <div class="dv-pool-title">📥 任务池</div>
+        <!-- 添加任务到任务池的表单 -->
+        <div class="dv-pool-add-form" id="dvPoolAddForm">
+          <input type="text" id="dvPoolNewName" placeholder="任务名称..." class="dv-pool-input"
+            onkeydown="if(event.key==='Enter')addDvPoolTask()" />
+          <select id="dvPoolNewLevel" class="dv-pool-select">
+            <option value="red">🔴</option>
+            <option value="yellow" selected>🟡</option>
+            <option value="green">🟢</option>
+          </select>
+          <select id="dvPoolNewPlan" class="dv-pool-select" style="font-size:10px;"></select>
+          <button class="dv-pool-add-btn" onclick="addDvPoolTask()">+ 加入</button>
+        </div>
+        <!-- 任务池列表 -->
+        <div id="dvPoolList"></div>
+      </div>
+      <!-- 右侧：时间轴 -->
+      <div class="dv-timeline-col" id="dvTimelineCol"
+        ondragover="onDvDragOver(event)"
+        ondragleave="onDvDragLeave(event)"
+        ondrop="onDvDrop(event)"
+        onclick="onTimelineColClick(event)">
+        <div id="dvTimelineInner"></div>
+      </div>
+    </div>
     <div class="dayview-footer">
       <div class="dv-stat" id="dayviewStat"></div>
       <button class="dv-add-btn" id="dayviewAddBtn" onclick="openDayViewAdd()">+ 添加日程</button>
@@ -814,7 +1029,7 @@
         <label>开始</label>
         <div class="td-edit-time">
           <select id="tdEditStartHour" onchange="updateTdEditOccupiedHint()"></select>
-          <span>—</span>
+          <span>时长</span>
           <select id="tdEditEndHour" onchange="updateTdEditOccupiedHint()"></select>
         </div>
       </div>
@@ -842,6 +1057,26 @@
   </div>
 </div>
 
+<!-- 任务池→时间轴 安排弹窗 -->
+<div class="modal-overlay" id="poolScheduleOverlay">
+  <div class="pool-schedule-modal">
+    <h3 id="poolScheduleTitle">📅 安排任务时间</h3>
+    <div style="font-size:13px;color:#666;margin-bottom:12px;">
+      将「<strong id="poolScheduleTaskName"></strong>」安排到 <strong id="poolScheduleDate"></strong>
+    </div>
+    <label style="font-size:13px;color:#666;display:block;margin-bottom:4px;">开始时间</label>
+    <select id="poolScheduleStart" style="width:100%;padding:8px;border:1.5px solid #e8e8e8;border-radius:8px;font-size:13px;outline:none;"></select>
+    <label style="font-size:13px;color:#666;display:block;margin-top:10px;margin-bottom:4px;">时长</label>
+    <select id="poolScheduleDur" style="width:100%;padding:8px;border:1.5px solid #e8e8e8;border-radius:8px;font-size:13px;outline:none;"></select>
+    <div id="poolSchedulePreview" style="font-size:11px;color:#888;margin-top:4px;"></div>
+    <div id="poolScheduleConflict" style="font-size:11px;color:#ff4d4f;margin-top:4px;display:none;"></div>
+    <div class="modal-btns" style="margin-top:16px;">
+      <button class="btn-cancel" onclick="closePoolSchedule()">取消</button>
+      <button class="btn-confirm" onclick="confirmPoolSchedule()">✓ 安排</button>
+    </div>
+  </div>
+</div>
+
 <!-- 调整时间弹窗 -->
 <div class="modal-overlay" id="adjustTimeOverlay">
   <div class="modal">
@@ -850,7 +1085,7 @@
     <label>新的开始时间</label>
     <select id="adjStartHour"></select>
     <div id="adjOccupiedHint" style="font-size:11px;color:#999;margin-top:4px;"></div>
-    <label style="margin-top:12px;">新的结束时间</label>
+    <label style="margin-top:12px;">时长</label>
     <select id="adjEndHour"></select>
     <div class="modal-btns" style="margin-top:20px;">
       <button class="btn-cancel" onclick="cancelAdjustTime()">取消</button>
@@ -859,22 +1094,49 @@
   </div>
 </div>
 
+<!-- 编辑 Plan 弹窗 -->
+<div class="modal-overlay" id="editPlanOverlay">
+  <div class="modal">
+    <h3>✏️ 编辑 Plan</h3>
+    <label>Plan 名称 *</label>
+    <input type="text" id="editPlanName" placeholder="输入 Plan 名称..." />
+    <label>目标时长（小时）</label>
+    <input type="number" id="editPlanTotalHours" placeholder="如：50" min="0" step="0.5" />
+    <label>重要性</label>
+    <select id="editPlanLevel">
+      <option value="red">🔴 重要</option>
+      <option value="yellow">🟡 一般</option>
+      <option value="green">🟢 轻松</option>
+    </select>
+    <label>截止日期（可选）</label>
+    <input type="date" id="editPlanDeadline" />
+    <label>备注（可选）</label>
+    <textarea id="editPlanNote" placeholder="备注内容..."></textarea>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeEditPlan()">取消</button>
+      <button class="btn-confirm" onclick="confirmEditPlan()">✓ 保存修改</button>
+    </div>
+  </div>
+</div>
+
 <script>
 // =================================================================
 //   数据结构
-//   mainTasks: [{id, name, level, note, done, totalHours, doneHours}]
+//   mainTasks: [{id, name, level, note, done, totalHours, doneHours, deadline}]
 //   calTasks:  [{id, name, level, note, done,
 //                year, month, day,
-//                startHour,   // 整数 0-23
-//                duration,    // duration 驱动（小时数，可小数）
+//                startHour,   // 数值，支持 0.5 步进（如 9.5 = 09:30）
+//                duration,    // duration 驱动（小时数，可小数，如 0.5 = 30min）
 //                mainTaskId,
 //                subtasks:[{id,name,done}]
 //               }]
+//   taskPool:  [{id, name, level, note, mainTaskId}]  // 待安排任务池
 // =================================================================
 let currentYear  = 2026;
 let currentMonth = 4;
 let mainTasks = [];
 let calTasks  = [];
+let taskPool  = [];  // 待安排任务池
 let nextId    = 1;
 
 // 添加日程弹窗内的临时子任务数组
@@ -898,8 +1160,21 @@ const levelConfig = {
   green:  { label: '轻松', color: '#52c41a', emoji: '🟢', bg: 'bg-green'  },
 };
 
-// 小时选项列表
-const HOUR_LABELS = Array.from({length: 25}, (_,i) => `${String(i).padStart(2,'0')}:00`);
+// 小时选项列表（30分钟步进）
+const HOUR_LABELS = [];
+for (let i = 0; i <= 48; i++) {
+  const h = Math.floor(i / 2);
+  const m = i % 2 === 0 ? '00' : '30';
+  HOUR_LABELS.push(`${String(h).padStart(2,'0')}:${m}`);
+}
+// 时长选项（30min步进）
+const DURATION_OPTIONS = [
+  { value: 0.5, label: '30min' },
+  { value: 1,   label: '1h'    },
+  { value: 1.5, label: '1.5h'  },
+  { value: 2,   label: '2h'    },
+  { value: 3,   label: '3h'    },
+];
 
 // 每日励志语
 const DAILY_QUOTES = [
@@ -958,17 +1233,28 @@ function init() {
 }
 
 function buildHourSelects() {
-  ['modalStartHour', 'modalEndHour'].forEach((id, idx) => {
-    const sel = document.getElementById(id);
-    sel.innerHTML = '';
-    HOUR_LABELS.forEach((label, i) => {
-      const opt = document.createElement('option');
-      opt.value = i;
-      opt.textContent = label;
-      if (!idx && i === 9) opt.selected = true;
-      if ( idx && i === 10) opt.selected = true;
-      sel.appendChild(opt);
-    });
+  // 开始时间：30分钟步进，value为小时数（浮点），如 9.5 表示 09:30
+  const startSel = document.getElementById('modalStartHour');
+  startSel.innerHTML = '';
+  for (let i = 0; i < 48; i++) {
+    const val = i * 0.5;
+    const h = Math.floor(val);
+    const m = val % 1 === 0 ? '00' : '30';
+    const opt = document.createElement('option');
+    opt.value = val;
+    opt.textContent = `${String(h).padStart(2,'0')}:${m}`;
+    if (val === 9) opt.selected = true;
+    startSel.appendChild(opt);
+  }
+  // 时长选择器
+  const durSel = document.getElementById('modalEndHour');
+  durSel.innerHTML = '';
+  DURATION_OPTIONS.forEach(d => {
+    const opt = document.createElement('option');
+    opt.value = d.value;
+    opt.textContent = d.label;
+    if (d.value === 1) opt.selected = true;
+    durSel.appendChild(opt);
   });
 }
 
@@ -977,13 +1263,51 @@ function render() {
   renderMainTasks();
   renderCalendar();
   renderStats();
+  renderMainPool();
+}
+
+// ==================== 渲染主界面任务池 ====================
+function renderMainPool() {
+  const el = document.getElementById('mainPoolList');
+  const cnt = document.getElementById('poolCount');
+  if (!el) return;
+  if (cnt) cnt.textContent = taskPool.length ? `${taskPool.length}项` : '';
+  if (!taskPool.length) {
+    el.innerHTML = '<div class="pool-empty">无待安排任务</div>';
+    return;
+  }
+  el.innerHTML = taskPool.map(p => {
+    const levelClass = `level-${p.level || 'yellow'}`;
+    return `<div class="pool-item ${levelClass}" data-pool-id="${p.id}">
+      <span class="pool-item-name">${escHtml(p.name)}</span>
+      <span class="pool-item-del" onclick="deletePoolTask(${p.id})" title="删除">×</span>
+    </div>`;
+  }).join('');
+}
+
+function addPoolTask() {
+  const name = document.getElementById('newPoolName').value.trim();
+  if (!name) return;
+  const level = document.getElementById('newPoolLevel').value;
+  taskPool.push({ id: nextId++, name, level, note: '', mainTaskId: null });
+  document.getElementById('newPoolName').value = '';
+  renderMainPool();
+  if (document.getElementById('dvPoolList')) renderDvPool();
+  saveData();
+}
+
+function deletePoolTask(id) {
+  taskPool = taskPool.filter(p => p.id !== id);
+  renderMainPool();
+  if (document.getElementById('dvPoolList')) renderDvPool();
+  saveData();
 }
 
 // ==================== 渲染总任务列表 ====================
 function renderMainTasks() {
   const list = document.getElementById('mainTaskList');
   if (!mainTasks.length) {
-    list.innerHTML = '<div style="text-align:center;color:#ccc;padding:30px 0;font-size:13px;">暂无任务，添加你的第一个目标吧～</div>';
+    list.innerHTML = '<div style="text-align:center;color:#ccc;padding:30px 0;font-size:13px;">暂无 Plan，添加你的第一个目标吧～</div>';
     return;
   }
   const groups = { red: [], yellow: [], green: [] };
@@ -998,6 +1322,15 @@ function renderMainTasks() {
     tasks.forEach(t => {
       const pct       = t.totalHours > 0 ? Math.min(100, (t.doneHours / t.totalHours) * 100).toFixed(1) : 0;
       const remaining = Math.max(0, (t.totalHours || 0) - (t.doneHours || 0));
+      const achieved  = t.totalHours > 0 && t.doneHours >= t.totalHours;
+      // 进度文字：若已完成目标，显示"完成！🎉"
+      const progressLabel = achieved
+        ? `<span style="color:#52c41a;font-weight:700">完成！🎉</span>`
+        : `<span style="color:${cfg.color};font-weight:600">${t.doneHours}/${t.totalHours}h</span>`;
+      // deadline 文字
+      const deadlineHtml = t.deadline
+        ? `<span style="color:#aaa;font-size:10px;margin-left:6px;">截止: ${t.deadline}</span>`
+        : '';
       html += `
         <div class="task-item level-${level} ${t.done ? 'done' : ''}" id="mt-${t.id}"
              draggable="true"
@@ -1009,18 +1342,20 @@ function renderMainTasks() {
               <div class="task-name">${escHtml(t.name)}</div>
               ${t.note ? `<div class="task-note">${escHtml(t.note)}</div>` : ''}
             </div>
-            <span class="task-del" onclick="deleteMain(${t.id})" title="删除任务">×</span>
+            <!-- 编辑按钮：铅笔图标 -->
+            <span class="task-edit-btn" onclick="openEditPlan(${t.id})" title="编辑 Plan">✏️</span>
+            <span class="task-del" onclick="deleteMain(${t.id})" title="删除 Plan">×</span>
           </div>
           ${t.totalHours > 0 ? `
           <div class="progress-wrap">
             <div class="progress-meta">
-              <span style="color:${cfg.color};font-weight:600">${t.doneHours} / ${t.totalHours}h</span>
+              <span>${progressLabel}${deadlineHtml}</span>
               <span>剩余 <strong>${remaining}h</strong></span>
             </div>
             <div class="progress-bar-bg">
-              <div class="progress-bar-fill" style="width:${pct}%;background:${cfg.color}"></div>
+              <div class="progress-bar-fill" style="width:${pct}%;background:${achieved ? '#52c41a' : cfg.color}"></div>
             </div>
-          </div>` : ''}
+          </div>` : (t.deadline ? `<div style="padding-left:24px;margin-top:4px;font-size:10px;color:#aaa;">截止: ${t.deadline}</div>` : '')}
         </div>`;
     });
   });
@@ -1105,8 +1440,9 @@ function renderCalendar() {
   grid.innerHTML = html;
 }
 
-// 时间轴常量
-const HOUR_H = 60;
+// 时间轴常量：每小时高度 = 80px（即每30分钟 40px）
+const HOUR_H = 80;
+const HALF_H = HOUR_H / 2; // 每30分钟高度
 
 // ==================== 渲染统计条 ====================
 function renderStats() {
@@ -1136,14 +1472,16 @@ function renderStats() {
 // ==================== 总任务区操作 ====================
 function addMainTask() {
   const name = document.getElementById('newTaskName').value.trim();
-  if (!name) { alert('请输入任务名称'); return; }
+  if (!name) { alert('请输入 Plan 名称'); return; }
   const level      = document.getElementById('newTaskLevel').value;
   const note       = document.getElementById('newTaskNote').value.trim();
   const totalHours = parseFloat(document.getElementById('newTaskTotalHours').value) || 0;
-  mainTasks.push({ id: nextId++, name, level, note, done: false, totalHours, doneHours: 0 });
+  const deadline   = document.getElementById('newTaskDeadline').value || null;
+  mainTasks.push({ id: nextId++, name, level, note, done: false, totalHours, doneHours: 0, deadline });
   document.getElementById('newTaskName').value       = '';
   document.getElementById('newTaskNote').value       = '';
   document.getElementById('newTaskTotalHours').value = '';
+  document.getElementById('newTaskDeadline').value   = '';
   renderMainTasks(); saveData();
 }
 
@@ -1152,6 +1490,73 @@ function deleteMain(id) {
   mainTasks = mainTasks.filter(t => t.id !== id);
   calTasks  = calTasks.filter(c => c.mainTaskId !== id);
   render(); saveData();
+}
+
+// ==================== Plan 编辑功能 ====================
+let editingPlanId = null; // 当前正在编辑的 Plan id
+
+/**
+ * 打开编辑 Plan 弹窗，默认带出现有内容
+ */
+function openEditPlan(id) {
+  const t = mainTasks.find(m => m.id === id);
+  if (!t) return;
+  editingPlanId = id;
+
+  // 将现有值填入表单
+  document.getElementById('editPlanName').value       = t.name;
+  document.getElementById('editPlanTotalHours').value = t.totalHours || '';
+  document.getElementById('editPlanLevel').value      = t.level || 'yellow';
+  document.getElementById('editPlanDeadline').value   = t.deadline || '';
+  document.getElementById('editPlanNote').value       = t.note || '';
+
+  document.getElementById('editPlanOverlay').classList.add('show');
+  setTimeout(() => document.getElementById('editPlanName').focus(), 80);
+}
+
+/**
+ * 关闭编辑 Plan 弹窗
+ */
+function closeEditPlan() {
+  document.getElementById('editPlanOverlay').classList.remove('show');
+  editingPlanId = null;
+}
+
+/**
+ * 保存 Plan 编辑
+ * - 保留 doneHours 不变（进度不重置）
+ * - 保留所有已绑定 calTask 关系
+ * - 联动更新进度条、deadline 显示
+ */
+function confirmEditPlan() {
+  if (!editingPlanId) return;
+  const t = mainTasks.find(m => m.id === editingPlanId);
+  if (!t) { closeEditPlan(); return; }
+
+  const name = document.getElementById('editPlanName').value.trim();
+  if (!name) { alert('请输入 Plan 名称'); return; }
+
+  const newTotalHours = parseFloat(document.getElementById('editPlanTotalHours').value) || 0;
+  const newLevel      = document.getElementById('editPlanLevel').value;
+  const newDeadline   = document.getElementById('editPlanDeadline').value || null;
+  const newNote       = document.getElementById('editPlanNote').value.trim();
+
+  // 更新 Plan 数据（保留 id、doneHours、done，不破坏现有关系）
+  t.name       = name;
+  t.totalHours = newTotalHours;
+  t.level      = newLevel;
+  t.deadline   = newDeadline;
+  t.note       = newNote;
+
+  // 若 doneHours 超过新的 totalHours，截断
+  if (newTotalHours > 0 && t.doneHours > newTotalHours) {
+    t.doneHours = newTotalHours;
+  }
+
+  closeEditPlan();
+  renderMainTasks();
+  saveData();
+  showToast(`✏️ Plan「${name}」已更新`, '#667eea');
 }
 
 function toggleMainDone(id) {
@@ -1198,16 +1603,29 @@ function confirmProgress() {
   if (!t) return;
   t.done = true;
   const hours = parseFloat(document.getElementById('progHours').value) || 0;
+  let justAchieved = false;
+  let achievedPlanName = '';
   if (hours > 0 && t.mainTaskId) {
     const mt = mainTasks.find(m => m.id === t.mainTaskId);
     if (mt) {
+      const wasAchieved = mt.totalHours > 0 && mt.doneHours >= mt.totalHours;
       mt.doneHours = parseFloat((mt.doneHours + hours).toFixed(2));
       if (mt.doneHours > mt.totalHours) mt.doneHours = mt.totalHours;
+      if (!wasAchieved && mt.totalHours > 0 && mt.doneHours >= mt.totalHours) {
+        justAchieved = true;
+        achievedPlanName = mt.name;
+      }
     }
   }
   closeProgressModal();
   render(); saveData();
   refreshDayViewIfOpen();
+  // Plan 达标庆祝
+  if (justAchieved) {
+    setTimeout(() => {
+      showToast(`🎉 恭喜！Plan「${achievedPlanName}」目标达成！`, '#52c41a');
+    }, 300);
+  }
 }
 
 function undoCalTask(id) {
@@ -1264,20 +1682,33 @@ function openDayView(day) {
   if (maxH - minH < 8) maxH = minH + 8;
 
   let axisHtml = '';
-  for (let h = minH; h <= maxH; h++) {
+  // 30分钟粒度刻度线
+  for (let s = minH * 2; s <= maxH * 2; s++) {
+    const h = s / 2;
     const top = (h - minH) * HOUR_H;
-    axisHtml += `<div class="dv-hour-line" style="top:${top}px"></div>`;
-    axisHtml += `<span class="dv-hour-label" style="top:${top}px">${String(h).padStart(2,'0')}:00</span>`;
+    const isHour = s % 2 === 0;
+    if (isHour) {
+      axisHtml += `<div class="dv-hour-line" style="top:${top}px;background:rgba(200,205,220,0.5)"></div>`;
+      axisHtml += `<span class="dv-hour-label" style="top:${top}px">${String(Math.floor(h)).padStart(2,'0')}:00</span>`;
+    } else {
+      axisHtml += `<div class="dv-hour-line" style="top:${top}px;background:rgba(200,205,220,0.2)"></div>`;
+      axisHtml += `<span class="dv-hour-label" style="top:${top}px;opacity:0.5;font-size:9px">${String(Math.floor(h)).padStart(2,'0')}:30</span>`;
+    }
   }
 
   const blocksHtml = sorted.map(t => renderDayViewBlock(t, minH)).join('');
   const totalH = (maxH - minH) * HOUR_H;
 
-  document.getElementById('dayviewBody').innerHTML = `
+  document.getElementById('dvTimelineInner').innerHTML = `
     <div class="dv-timeaxis" style="min-height:${totalH}px" data-min-h="${minH}" data-max-h="${maxH}">
       ${axisHtml}
       ${blocksHtml}
     </div>`;
+
+  // 渲染任务池
+  renderDvPool();
+  // 初始化任务池的绑定 Plan 下拉框
+  initDvPoolPlanSelect();
 
   document.getElementById('dayviewOverlay').classList.add('show');
 }
@@ -1287,7 +1718,8 @@ function renderDayViewBlock(t, minH = 0) {
   const cfg      = levelConfig[t.level] || levelConfig.yellow;
   const dur      = parseFloat(t.duration) || 1;
   const startH   = t.startHour != null ? t.startHour : 8;
-  const durLabel = Number.isInteger(dur) ? `${dur}h` : `${dur}h`;
+  // 时长标签：30min or Xh or X.5h
+  const durLabel = dur === 0.5 ? '30min' : (Number.isInteger(dur) ? `${dur}h` : `${dur}h`);
   const bgClass  = cfg.bg === 'bg-red' ? 'dv-bg-red' : cfg.bg === 'bg-green' ? 'dv-bg-green' : 'dv-bg-yellow';
 
   // 子任务进度
@@ -1298,7 +1730,11 @@ function renderDayViewBlock(t, minH = 0) {
     : '';
 
   const topPx    = (startH - minH) * HOUR_H;
-  const heightPx = Math.max(40, dur * HOUR_H);
+  const heightPx = Math.max(34, dur * HOUR_H);
+
+  // 关联 Plan 标记
+  const mt = t.mainTaskId ? mainTasks.find(m => m.id === t.mainTaskId) : null;
+  const planBadge = mt ? `<span style="font-size:9px;opacity:0.8;flex-shrink:0;">🎯${escHtml(mt.name)}</span>` : '';
 
   return `<div class="dv-task-block ${bgClass} ${t.done ? 'done' : ''}"
     style="top:${topPx}px;height:${heightPx}px;" data-task-id="${t.id}" data-start-hour="${startH}" data-duration="${dur}"
@@ -1308,6 +1744,7 @@ function renderDayViewBlock(t, minH = 0) {
       <span class="dv-task-name">${escHtml(t.name)}</span>
       <span class="dv-task-dur">${durLabel}</span>
       ${subCountHtml}
+      ${planBadge}
     </div>
     <div class="dv-task-actions">
       ${t.done
@@ -1375,10 +1812,43 @@ function closeDayView() {
   currentDayViewDate = null;
 }
 
-function openDayViewAdd() {
+function openDayViewAdd(presetHour) {
   const date = currentDayViewDate;
-  closeDayView();
-  if (date) setTimeout(() => openModal(date), 180);
+  // 如果弹窗还没打开，先关闭日视图再打开（避免遮挡）
+  // 注意：这里不关闭日视图，直接叠加显示添加弹窗
+  if (date) {
+    openModal(date, presetHour);
+  }
+}
+
+/**
+ * 点击日视图时间轴空白处，自动按点击位置计算时间并打开添加弹窗
+ * 注意：点击 task block 时不触发（e.target 检测）
+ */
+function onTimelineColClick(e) {
+  // 若点到的是任务 block 或其子元素，不触发
+  let el = e.target;
+  while (el && el !== e.currentTarget) {
+    if (el.classList && (el.classList.contains('dv-task-block') || el.classList.contains('dv-task-btn'))) return;
+    el = el.parentElement;
+  }
+
+  // 计算点击位置对应的时间
+  const col = document.getElementById('dvTimelineCol');
+  if (!col) return;
+  const axis = col.querySelector('.dv-timeaxis');
+  if (!axis) return;
+
+  const colRect = col.getBoundingClientRect();
+  const scrollTop = col.scrollTop;
+  const relY = e.clientY - colRect.top + scrollTop;
+  const minH = parseInt(axis.dataset.minH) || 7;
+  // 对齐到 30 分钟
+  const rawHour = minH + relY / HOUR_H;
+  const snapped = Math.round(rawHour * 2) / 2;
+  const clampedHour = Math.max(0, Math.min(23.5, snapped));
+
+  openDayViewAdd(clampedHour);
 }
 
 document.getElementById('dayviewOverlay').addEventListener('click', e => {
@@ -1396,17 +1866,20 @@ function getHourFromMouseY(e, dayviewBody) {
   if (!match) return null;
   const axisEl = match;
   const minH = parseInt(axisEl.dataset.minH) || 7;
-  const hour = minH + Math.floor(relY / HOUR_H);
-  return Math.max(minH, Math.min(23, hour));
+  // 30分钟粒度：每HOUR_H像素=1小时，对齐到0.5
+  const rawHour = minH + relY / HOUR_H;
+  const snapped = Math.round(rawHour * 2) / 2; // 对齐到0.5
+  return Math.max(minH, Math.min(23.5, snapped));
 }
 
 function onDvDragOver(e) {
-  if (dragType !== 'cal' || draggedId === null) return;
+  if (dragType !== 'cal' && dragType !== 'pool') return;
   e.preventDefault();
   e.dataTransfer.dropEffect = 'move';
 
-  const body = document.getElementById('dayviewBody');
-  const newH = getHourFromMouseY(e, body);
+  const col = document.getElementById('dvTimelineCol');
+  if (!col) return;
+  const newH = getHourFromMouseY(e, col);
 
   const oldHint = document.querySelector('.dv-drop-hint');
   if (oldHint) oldHint.remove();
@@ -1420,28 +1893,40 @@ function onDvDragOver(e) {
       const hint = document.createElement('div');
       hint.className = 'dv-drop-hint';
       hint.style.top = top + 'px';
-      hint.style.height = (HOUR_H * 0.6) + 'px';
-      hint.textContent = '↕ 放置到 ' + String(newH).padStart(2,'0') + ':00';
+      hint.style.height = (HALF_H * 0.8) + 'px';
+      const hh = Math.floor(newH);
+      const mm = newH % 1 === 0 ? '00' : '30';
+      hint.textContent = `↕ 放置到 ${String(hh).padStart(2,'0')}:${mm}`;
       match.appendChild(hint);
     }
   }
-  body.classList.add('drag-over');
+  col.classList.add('drag-over');
 }
 
 function onDvDragLeave(e) {
-  if (!document.getElementById('dayviewBody').contains(e.relatedTarget)) {
+  const col = document.getElementById('dvTimelineCol');
+  if (!col) return;
+  if (!col.contains(e.relatedTarget)) {
     const oldHint = document.querySelector('.dv-drop-hint');
     if (oldHint) oldHint.remove();
-    document.getElementById('dayviewBody').classList.remove('drag-over');
+    col.classList.remove('drag-over');
     dvDragTargetH = null;
   }
 }
 
 function onDvDrop(e) {
   e.preventDefault();
-  document.getElementById('dayviewBody').classList.remove('drag-over');
+  const col = document.getElementById('dvTimelineCol');
+  if (col) col.classList.remove('drag-over');
   const oldHint = document.querySelector('.dv-drop-hint');
   if (oldHint) oldHint.remove();
+
+  // 任务池 → 时间轴
+  if (dragType === 'pool' && dvPoolDragId !== null && dvDragTargetH !== null) {
+    openPoolSchedule(dvPoolDragId, currentDayViewDate, dvDragTargetH);
+    dvDragTargetH = null;
+    return;
+  }
 
   if (dragType !== 'cal' || draggedId === null || dvDragTargetH === null) {
     dvDragTargetH = null;
@@ -1471,28 +1956,25 @@ function onDvDrop(e) {
   renderCalendar();
 }
 
-// ==================== 时间冲突检测 ====================
-function checkTimeConflict(dateStr, startH, endH, excludeId = null) {
+// ==================== 时间冲突检测（30分钟粒度） ====================
+function checkTimeConflict30(dateStr, startH, endH, excludeId = null) {
   if (!dateStr) return null;
   const [y, m, d] = dateStr.split('-').map(Number);
-
-  const dayTasks = calTasks.filter(task => task.year === y && task.month === m && task.day === d && task.id !== excludeId);
-
-  const newStart = startH;
-  const newEnd = endH;
-
+  const dayTasks = calTasks.filter(t => t.year === y && t.month === m && t.day === d && t.id !== excludeId);
   for (const task of dayTasks) {
-    const existStart = task.startHour;
-    const existEnd = existStart + (parseFloat(task.duration) || 1);
-
-    if (!(newEnd <= existStart || newStart >= existEnd)) {
-      return task;
-    }
+    const es = task.startHour;
+    const ee = es + (parseFloat(task.duration) || 1);
+    if (!(endH <= es || startH >= ee)) return task;
   }
   return null;
 }
 
-function getOccupiedHours(dateStr) {
+// ==================== 时间冲突检测（旧版，保留兼容） ====================
+function checkTimeConflict(dateStr, startH, endH, excludeId = null) {
+  return checkTimeConflict30(dateStr, startH, endH, excludeId);
+}
+
+function getOccupiedSlots(dateStr) {
   const occupied = new Set();
   if (!dateStr) return occupied;
   const [y, m, d] = dateStr.split('-').map(Number);
@@ -1500,11 +1982,16 @@ function getOccupiedHours(dateStr) {
   dayTasks.forEach(t => {
     const start = t.startHour;
     const dur = parseFloat(t.duration) || 1;
-    for (let h = start; h < start + dur; h++) {
-      occupied.add(h);
+    // 以0.5步进标记所有被占用的半小时槽
+    for (let s = start; s < start + dur; s += 0.5) {
+      occupied.add(s);
     }
   });
   return occupied;
+}
+
+function getOccupiedHours(dateStr) {
+  return getOccupiedSlots(dateStr);
 }
 
 // ==================== 子任务详情弹窗 ====================
@@ -1597,23 +2084,25 @@ function buildTdHourSelects() {
   const endSel = document.getElementById('tdEditEndHour');
   if (!startSel || !endSel) return;
 
-  // 构建开始时间选项 (0-23)
+  // 构建开始时间选项（30分钟步进）
   startSel.innerHTML = '';
-  for (let h = 0; h <= 23; h++) {
+  for (let i = 0; i < 48; i++) {
+    const val = i * 0.5;
+    const h = Math.floor(val); const m = val % 1 === 0 ? '00' : '30';
     const opt = document.createElement('option');
-    opt.value = h;
-    opt.textContent = `${String(h).padStart(2,'0')}:00`;
+    opt.value = val;
+    opt.textContent = `${String(h).padStart(2,'0')}:${m}`;
     startSel.appendChild(opt);
   }
 
-  // 构建结束时间选项 (1-24)
+  // 构建时长选项
   endSel.innerHTML = '';
-  for (let h = 1; h <= 24; h++) {
+  DURATION_OPTIONS.forEach(d => {
     const opt = document.createElement('option');
-    opt.value = h;
-    opt.textContent = `${String(h).padStart(2,'0')}:00`;
+    opt.value = d.value;
+    opt.textContent = d.label;
     endSel.appendChild(opt);
-  }
+  });
 }
 
 /**
@@ -1639,10 +2128,9 @@ function showTdEditMode() {
 
   const startH = t.startHour != null ? t.startHour : 8;
   const dur = parseFloat(t.duration) || 1;
-  const endH = startH + dur;
 
   startSel.value = startH;
-  endSel.value = endH;
+  endSel.value = dur; // 时长选择器
 
   // 隐藏按钮区域，显示编辑表单
   document.getElementById('tdEditTimeBtnArea').style.display = 'none';
@@ -1682,26 +2170,19 @@ function updateTdEditOccupiedHint() {
   if (!t) return;
 
   const dateStr = document.getElementById('tdEditDate').value;
-  const startH = parseInt(document.getElementById('tdEditStartHour').value);
-  const endH = parseInt(document.getElementById('tdEditEndHour').value);
+  const startH = parseFloat(document.getElementById('tdEditStartHour').value);
+  const dur    = parseFloat(document.getElementById('tdEditEndHour').value);
+  const endH   = startH + dur;
 
   if (!dateStr) return;
 
   const hint = document.getElementById('tdEditHint');
 
-  // 检查时间有效性
-  if (endH <= startH) {
-    hint.textContent = '⚠️ 结束时间必须大于开始时间';
-    hint.classList.add('show');
-    return;
-  }
-
   // 检查冲突
-  const conflictTask = checkTimeConflict(dateStr, startH, endH, currentDetailTaskId);
+  const conflictTask = checkTimeConflict30(dateStr, startH, endH, currentDetailTaskId);
   if (conflictTask) {
-    const conflictStart = String(conflictTask.startHour).padStart(2,'0') + ':00';
-    const conflictEnd = String(conflictTask.startHour + (parseFloat(conflictTask.duration) || 1)).padStart(2,'0') + ':00';
-    hint.textContent = `⛔ 该时间段已被「${conflictTask.name}」占用（${conflictStart} - ${conflictEnd}）`;
+    const fmt = v => { const h=Math.floor(v),m=v%1===0?'00':'30'; return `${String(h).padStart(2,'0')}:${m}`; };
+    hint.textContent = `⛔ 该时间段已被「${conflictTask.name}」占用（${fmt(conflictTask.startHour)} - ${fmt(conflictTask.startHour + parseFloat(conflictTask.duration))}）`;
     hint.classList.add('show');
   } else {
     hint.classList.remove('show');
@@ -1718,25 +2199,25 @@ function confirmTdEdit() {
   if (!t) return;
 
   const dateStr = document.getElementById('tdEditDate').value;
-  const startH = parseInt(document.getElementById('tdEditStartHour').value);
-  const endH = parseInt(document.getElementById('tdEditEndHour').value);
+  const startH = parseFloat(document.getElementById('tdEditStartHour').value);
+  const dur    = parseFloat(document.getElementById('tdEditEndHour').value);
+  const endH   = startH + dur;
 
   if (!dateStr) {
     alert('请选择日期');
     return;
   }
 
-  if (endH <= startH) {
-    alert('结束时间必须大于开始时间');
+  if (dur <= 0) {
+    alert('请选择有效时长');
     return;
   }
 
   // 检查时间冲突
-  const conflictTask = checkTimeConflict(dateStr, startH, endH, currentDetailTaskId);
+  const fmt = v => { const h=Math.floor(v),m=v%1===0?'00':'30'; return `${String(h).padStart(2,'0')}:${m}`; };
+  const conflictTask = checkTimeConflict30(dateStr, startH, endH, currentDetailTaskId);
   if (conflictTask) {
-    const conflictStart = String(conflictTask.startHour).padStart(2,'0') + ':00';
-    const conflictEnd = String(conflictTask.startHour + (parseFloat(conflictTask.duration) || 1)).padStart(2,'0') + ':00';
-    alert(`❌ 该时间段已被「${conflictTask.name}」占用\n（${conflictStart} - ${conflictEnd}）\n\n请调整后再保存。`);
+    alert(`❌ 该时间段已被「${conflictTask.name}」占用\n（${fmt(conflictTask.startHour)} - ${fmt(conflictTask.startHour + parseFloat(conflictTask.duration))}）\n\n请调整后再保存。`);
     return;
   }
 
@@ -1752,7 +2233,7 @@ function confirmTdEdit() {
   t.month = newMonth;
   t.day = newDay;
   t.startHour = startH;
-  t.duration = endH - startH;
+  t.duration = dur;
 
   // 保存数据
   saveData();
@@ -1944,16 +2425,30 @@ function updateModalSubtask(idx, value) {
 }
 
 // ==================== 添加日程弹窗 ====================
-function openModal(dateStr) {
+function openModal(dateStr, presetHour) {
   document.getElementById('modalDate').value     = dateStr || '';
   document.getElementById('modalTaskName').value = '';
   document.getElementById('modalNote').value     = '';
-  document.getElementById('modalStartHour').value = 9;
-  document.getElementById('modalEndHour').value   = 10;
+  // 若有预设时间则使用（点击时间轴传入），否则默认 9:00
+  const defaultHour = (presetHour !== undefined && presetHour !== null) ? presetHour : 9;
+  document.getElementById('modalStartHour').value = defaultHour;
+  document.getElementById('modalEndHour').value   = 1;
   document.getElementById('modalLevel').value     = 'yellow';
   document.getElementById('modalTitle').textContent = dateStr ? `添加日程 — ${dateStr}` : '添加日程';
+  // 清空绑定Plan选择器
+  const planSel = document.getElementById('modalPlanId');
+  if (planSel) {
+    planSel.innerHTML = '<option value="">— 不绑定 Plan —</option>';
+    mainTasks.forEach(m => {
+      const opt = document.createElement('option');
+      opt.value = m.id;
+      opt.textContent = `${m.name}${m.totalHours > 0 ? ` (${m.doneHours}/${m.totalHours}h)` : ''}`;
+      planSel.appendChild(opt);
+    });
+  }
 
   modalEditDate = dateStr || null;
+  updateModalTimePreview();
   updateTimeSelectorAvailability();
 
   modalSubtasks = [];
@@ -1962,25 +2457,46 @@ function openModal(dateStr) {
   setTimeout(() => document.getElementById('modalTaskName').focus(), 80);
 }
 
+function updateModalTimePreview() {
+  const startVal = parseFloat(document.getElementById('modalStartHour').value);
+  const durVal   = parseFloat(document.getElementById('modalEndHour').value);
+  const endVal   = startVal + durVal;
+  const fmtHalf  = v => {
+    const h = Math.floor(v); const m = v % 1 === 0 ? '00' : '30';
+    return `${String(h).padStart(2,'0')}:${m}`;
+  };
+  const preview = document.getElementById('modalTimePreview');
+  if (preview) preview.textContent = `${fmtHalf(startVal)} — ${fmtHalf(endVal)}`;
+}
+
+function onModalTimeChange() {
+  updateModalTimePreview();
+  updateTimeSelectorAvailability();
+}
+
 function updateTimeSelectorAvailability() {
   const startSel = document.getElementById('modalStartHour');
-  const endSel = document.getElementById('modalEndHour');
-  const occupied = getOccupiedHours(modalEditDate);
+  const occupied = getOccupiedSlots(modalEditDate);
   const hint = document.getElementById('modalOccupiedHint');
 
   Array.from(startSel.options).forEach(opt => {
-    const h = parseInt(opt.value);
-    opt.textContent = `${String(h).padStart(2,'0')}:00${occupied.has(h) ? ' ⛔' : ''}`;
+    const v = parseFloat(opt.value);
+    const h = Math.floor(v); const m = v % 1 === 0 ? '00' : '30';
+    opt.textContent = `${String(h).padStart(2,'0')}:${m}${occupied.has(v) ? ' ⛔' : ''}`;
   });
 
-  Array.from(endSel.options).forEach(opt => {
-    const h = parseInt(opt.value);
-    opt.textContent = `${String(h).padStart(2,'0')}:00${occupied.has(h) ? ' ⛔' : ''}`;
-  });
-
-  if (occupied.size > 0) {
-    const occupiedList = Array.from(occupied).sort((a, b) => a - b).map(h => `${String(h).padStart(2,'0')}:00`).join('、');
-    hint.innerHTML = `⛔ 已占用：${occupiedList}`;
+  const startVal = parseFloat(startSel.value);
+  const durVal   = parseFloat(document.getElementById('modalEndHour').value);
+  const endVal   = startVal + durVal;
+  const conflictTask = checkTimeConflict30(modalEditDate, startVal, endVal);
+  if (conflictTask) {
+    hint.innerHTML = `⛔ 与「${escHtml(conflictTask.name)}」时间冲突`;
+  } else if (occupied.size > 0) {
+    const list = Array.from(occupied).sort((a,b)=>a-b).map(v => {
+      const h = Math.floor(v); const m = v % 1 === 0 ? '00' : '30';
+      return `${String(h).padStart(2,'0')}:${m}`;
+    }).join('、');
+    hint.innerHTML = `⛔ 已占用：${list}`;
   } else {
     hint.innerHTML = '';
   }
@@ -1989,6 +2505,7 @@ function updateTimeSelectorAvailability() {
 function onModalDateChange() {
   modalEditDate = document.getElementById('modalDate').value;
   updateTimeSelectorAvailability();
+  updateModalTimePreview();
 }
 
 function closeModal() {
@@ -2022,25 +2539,26 @@ function showAdjustTimeModal(taskId, targetDate, dragSource) {
 
   const startSel = document.getElementById('adjStartHour');
   startSel.innerHTML = '';
-  for (let h = 0; h <= 23; h++) {
+  for (let i = 0; i < 48; i++) {
+    const val = i * 0.5;
+    const h = Math.floor(val); const mm = val % 1 === 0 ? '00' : '30';
     const opt = document.createElement('option');
-    opt.value = h;
-    const occupiedMark = occupied.has(h) ? ' ⛔' : '';
-    opt.textContent = `${String(h).padStart(2,'0')}:00${occupiedMark}`;
-    if (h === startH) opt.selected = true;
+    opt.value = val;
+    const occupiedMark = occupied.has(val) ? ' ⛔' : '';
+    opt.textContent = `${String(h).padStart(2,'0')}:${mm}${occupiedMark}`;
+    if (Math.abs(val - startH) < 0.01) opt.selected = true;
     startSel.appendChild(opt);
   }
 
   const endSel = document.getElementById('adjEndHour');
   endSel.innerHTML = '';
-  for (let h = 1; h <= 24; h++) {
+  DURATION_OPTIONS.forEach(d => {
     const opt = document.createElement('option');
-    opt.value = h;
-    const occupiedMark = occupied.has(h) ? ' ⛔' : '';
-    opt.textContent = `${String(h).padStart(2,'0')}:00${occupiedMark}`;
-    if (h === endH) opt.selected = true;
+    opt.value = d.value;
+    opt.textContent = d.label;
+    if (Math.abs(d.value - (endH - startH)) < 0.01) opt.selected = true;
     endSel.appendChild(opt);
-  }
+  });
 
   updateAdjOccupiedHint(occupied);
 
@@ -2057,8 +2575,8 @@ function getOccupiedHoursExclude(dateStr, excludeTaskId) {
   dayTasks.forEach(t => {
     const start = t.startHour;
     const dur = parseFloat(t.duration) || 1;
-    for (let h = start; h < start + dur; h++) {
-      occupied.add(h);
+    for (let s = start; s < start + dur; s += 0.5) {
+      occupied.add(s);
     }
   });
   return occupied;
@@ -2068,7 +2586,8 @@ function updateAdjOccupiedHint(occupied) {
   const hint = document.getElementById('adjOccupiedHint');
   if (occupied.size > 0) {
     const occupiedList = Array.from(occupied).sort((a, b) => a - b)
-      .map(h => `${String(h).padStart(2,'0')}:00`).join('、');
+      .map(v => { const h=Math.floor(v),m=v%1===0?'00':'30'; return `${String(h).padStart(2,'0')}:${m}`; })
+      .join('、');
     hint.innerHTML = `⛔ 已占用：${occupiedList}`;
   } else {
     hint.innerHTML = '';
@@ -2092,25 +2611,27 @@ function confirmAdjustTime() {
   const t = calTasks.find(task => task.id === taskId);
   if (!t) { cancelAdjustTime(); return; }
 
-  const newStartH = parseInt(document.getElementById('adjStartHour').value);
-  const newEndH = parseInt(document.getElementById('adjEndHour').value);
+  const newStartH = parseFloat(document.getElementById('adjStartHour').value);
+  const newDur    = parseFloat(document.getElementById('adjEndHour').value);
+  const newEndH   = newStartH + newDur;
 
-  if (newEndH <= newStartH) {
-    alert('结束时间必须大于开始时间'); return;
+  if (newDur <= 0) {
+    alert('请选择有效时长'); return;
   }
 
-  const conflictTask = checkTimeConflict(targetDate, newStartH, newEndH, taskId);
+  const fmt = v => { const h=Math.floor(v),m=v%1===0?'00':'30'; return `${String(h).padStart(2,'0')}:${m}`; };
+  const conflictTask = checkTimeConflict30(targetDate, newStartH, newEndH, taskId);
   if (conflictTask) {
-    const conflictStart = String(conflictTask.startHour).padStart(2,'0') + ':00';
-    const conflictEnd = String(conflictTask.startHour + (parseFloat(conflictTask.duration) || 1)).padStart(2,'0') + ':00';
-    alert(`❌ 仍存在冲突！\n\n该时间段已被「${conflictTask.name}」占用\n（${conflictStart} - ${conflictEnd}）\n\n请选择其它时间段。`);
+    const cs = fmt(conflictTask.startHour);
+    const ce = fmt(conflictTask.startHour + (parseFloat(conflictTask.duration) || 1));
+    alert(`❌ 仍存在冲突！\n\n该时间段已被「${conflictTask.name}」占用\n（${cs} - ${ce}）\n\n请选择其它时间段。`);
     return;
   }
 
   const [y, m, day] = targetDate.split('-').map(Number);
   t.year = y; t.month = m; t.day = day;
   t.startHour = newStartH;
-  t.duration = newEndH - newStartH;
+  t.duration = newDur;
 
   document.getElementById('adjustTimeOverlay').classList.remove('show');
   adjustTimeCtx = { taskId: null, targetDate: null, originalStart: 0, originalDuration: 1, dragSource: null };
@@ -2137,44 +2658,56 @@ function confirmModal() {
   const dateStr  = document.getElementById('modalDate').value;
   const level    = document.getElementById('modalLevel').value;
   const note     = document.getElementById('modalNote').value.trim();
-  const startH   = parseInt(document.getElementById('modalStartHour').value);
-  const endH     = parseInt(document.getElementById('modalEndHour').value);
+  const startH   = parseFloat(document.getElementById('modalStartHour').value);
+  const dur      = parseFloat(document.getElementById('modalEndHour').value);
+  const endH     = startH + dur;
 
-  if (endH <= startH) {
-    alert('结束时间必须大于开始时间');
+  if (dur <= 0) {
+    alert('请选择有效时长');
     return;
   }
-  const duration = endH - startH;
 
-  const conflictTask = checkTimeConflict(dateStr, startH, endH);
+  const conflictTask = checkTimeConflict30(dateStr, startH, endH);
   if (conflictTask) {
-    const conflictStart = String(conflictTask.startHour).padStart(2,'0') + ':00';
-    const conflictEnd = String(conflictTask.startHour + (parseFloat(conflictTask.duration) || 1)).padStart(2,'0') + ':00';
-    alert(`❌ 时间冲突！\n\n该时间段已被「${conflictTask.name}」占用\n（${conflictStart} - ${conflictEnd}）\n\n请选择其它时间段。`);
+    const fmtH = v => { const h=Math.floor(v),m=v%1===0?'00':'30'; return `${String(h).padStart(2,'0')}:${m}`; };
+    const cs = fmtH(conflictTask.startHour);
+    const ce = fmtH(conflictTask.startHour + (parseFloat(conflictTask.duration) || 1));
+    alert(`❌ 时间冲突！\n\n该时间段已被「${conflictTask.name}」占用\n（${cs} - ${ce}）\n\n请选择其它时间段。`);
     return;
   }
 
   let year = currentYear, month = currentMonth, day = null;
   if (dateStr) { [year, month, day] = dateStr.split('-').map(Number); }
 
-  const matched = mainTasks.find(m => m.name === name);
+  // Plan 绑定：优先使用下拉框选择，其次按名称匹配
+  let planId = null;
+  const planSel = document.getElementById('modalPlanId');
+  if (planSel && planSel.value) {
+    planId = parseInt(planSel.value);
+  } else {
+    const matched = mainTasks.find(m => m.name === name);
+    if (matched) planId = matched.id;
+  }
 
   const finalSubtasks = modalSubtasks
     .filter(s => s.name.trim() !== '')
     .map((s, i) => ({ id: nextId + i, name: s.name.trim(), done: false }));
+  nextId += finalSubtasks.length;
 
   calTasks.push({
     id: nextId++, name, level, note, done: false,
     year, month, day,
     startHour: startH,
-    duration,
-    mainTaskId: matched ? matched.id : null,
+    duration: dur,
+    mainTaskId: planId,
     subtasks: finalSubtasks,
   });
 
   closeModal();
   modalEditDate = null;
   render(); saveData();
+  // 若日视图仍打开，刷新时间轴显示新增任务
+  refreshDayViewIfOpen();
 }
 
 // ==================== 键盘快捷键 ====================
@@ -2184,12 +2717,21 @@ document.addEventListener('keydown', e => {
     if (document.getElementById('adjustTimeOverlay').classList.contains('show')) {
       cancelAdjustTime();
     }
+    if (document.getElementById('poolScheduleOverlay').classList.contains('show')) {
+      closePoolSchedule();
+    }
+    if (document.getElementById('editPlanOverlay').classList.contains('show')) {
+      closeEditPlan();
+    }
   }
   if (e.key === 'Enter') {
     if (document.getElementById('modalOverlay').classList.contains('show') && e.target.tagName !== 'TEXTAREA') confirmModal();
     if (document.getElementById('progressOverlay').classList.contains('show')) confirmProgress();
     if (document.getElementById('adjustTimeOverlay').classList.contains('show')) {
       confirmAdjustTime();
+    }
+    if (document.getElementById('editPlanOverlay').classList.contains('show') && e.target.tagName !== 'TEXTAREA') {
+      confirmEditPlan();
     }
   }
 });
@@ -2202,6 +2744,13 @@ document.getElementById('progressOverlay').addEventListener('click', e => {
 document.getElementById('adjustTimeOverlay').addEventListener('click', e => {
   if (e.target === document.getElementById('adjustTimeOverlay')) cancelAdjustTime();
 });
+document.getElementById('poolScheduleOverlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('poolScheduleOverlay')) closePoolSchedule();
+});
+// 编辑 Plan 弹窗：点击遮罩关闭
+document.getElementById('editPlanOverlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('editPlanOverlay')) closeEditPlan();
+});
 
 // ==================== 切换月份 ====================
 function changeMonth(delta) {
@@ -2209,6 +2758,26 @@ function changeMonth(delta) {
   if (currentMonth > 12) { currentMonth = 1;  currentYear++; }
   if (currentMonth < 1)  { currentMonth = 12; currentYear--; }
   renderCalendar(); renderStats();
+}
+
+/**
+ * 点击「今日」按钮：将月历切换到今天所在月份，并高亮今天
+ * 若今天已在当前视图则保持不变，只刷新高亮
+ */
+function goToToday() {
+  const now = new Date();
+  const y = now.getFullYear();
+  const m = now.getMonth() + 1; // JS month is 0-indexed
+
+  // 若当前不在今天所在月份，先切换
+  if (y !== currentYear || m !== currentMonth) {
+    currentYear  = y;
+    currentMonth = m;
+  }
+  // 始终刷新日历，确保今日高亮正确
+  renderCalendar();
+  renderStats();
+  showToast(`📅 已回到 ${y}年${m}月${now.getDate()}日`, '#667eea');
 }
 
 // ==================== 拖拽系统 ====================
@@ -2281,7 +2850,7 @@ function onDropToDay(e, day) {
     const src = mainTasks.find(t => t.id === draggedId);
     if (!src) { draggedId = null; dragType = null; return; }
 
-    const conflictTask = checkTimeConflict(targetDate, 9, 10);
+    const conflictTask = checkTimeConflict30(targetDate, 9, 10);
     if (conflictTask) {
       showAdjustTimeModalForNew(src, targetDate, day);
     } else {
@@ -2306,7 +2875,7 @@ function onDropToDay(e, day) {
     const newStartH = t.startHour;
     const newEndH = newStartH + dur;
 
-    const conflictTask = checkTimeConflict(targetDate, newStartH, newEndH, draggedId);
+    const conflictTask = checkTimeConflict30(targetDate, newStartH, newEndH, draggedId);
     if (conflictTask) {
       showAdjustTimeModal(draggedId, targetDate, 'month');
     } else {
@@ -2340,25 +2909,26 @@ function showAdjustTimeModalForNew(mainTaskSrc, targetDate, day) {
 
   const startSel = document.getElementById('adjStartHour');
   startSel.innerHTML = '';
-  for (let h = 0; h <= 23; h++) {
+  for (let i = 0; i < 48; i++) {
+    const val = i * 0.5;
+    const h = Math.floor(val); const mm = val % 1 === 0 ? '00' : '30';
     const opt = document.createElement('option');
-    opt.value = h;
-    const occupiedMark = occupied.has(h) ? ' ⛔' : '';
-    opt.textContent = `${String(h).padStart(2,'0')}:00${occupiedMark}`;
-    if (h === 9) opt.selected = true;
+    opt.value = val;
+    const occupiedMark = occupied.has(val) ? ' ⛔' : '';
+    opt.textContent = `${String(h).padStart(2,'0')}:${mm}${occupiedMark}`;
+    if (val === 9) opt.selected = true;
     startSel.appendChild(opt);
   }
 
   const endSel = document.getElementById('adjEndHour');
   endSel.innerHTML = '';
-  for (let h = 1; h <= 24; h++) {
+  DURATION_OPTIONS.forEach(dd => {
     const opt = document.createElement('option');
-    opt.value = h;
-    const occupiedMark = occupied.has(h) ? ' ⛔' : '';
-    opt.textContent = `${String(h).padStart(2,'0')}:00${occupiedMark}`;
-    if (h === 10) opt.selected = true;
+    opt.value = dd.value;
+    opt.textContent = dd.label;
+    if (dd.value === 1) opt.selected = true;
     endSel.appendChild(opt);
-  }
+  });
 
   updateAdjOccupiedHint(occupied);
   document.getElementById('adjustTimeOverlay').classList.add('show');
@@ -2370,11 +2940,12 @@ function confirmAdjustTimeForNew() {
   if (!pendingNewTask) { cancelAdjustTime(); return; }
 
   const { mainTaskSrc, targetDate, day } = pendingNewTask;
-  const newStartH = parseInt(document.getElementById('adjStartHour').value);
-  const newEndH = parseInt(document.getElementById('adjEndHour').value);
+  const newStartH = parseFloat(document.getElementById('adjStartHour').value);
+  const newDur    = parseFloat(document.getElementById('adjEndHour').value);
+  const newEndH   = newStartH + newDur;
 
-  if (newEndH <= newStartH) {
-    alert('结束时间必须大于开始时间'); return;
+  if (newDur <= 0) {
+    alert('请选择有效时长'); return;
   }
 
   const [y, m, d] = targetDate.split('-').map(Number);
@@ -2382,7 +2953,7 @@ function confirmAdjustTimeForNew() {
   calTasks.push({
     id: nextId++, name: mainTaskSrc.name, level: mainTaskSrc.level, note: mainTaskSrc.note, done: false,
     year: y, month: m, day: d,
-    startHour: newStartH, duration: newEndH - newStartH, mainTaskId: mainTaskSrc.id,
+    startHour: newStartH, duration: newDur, mainTaskId: mainTaskSrc.id,
     subtasks: [],
   });
 
@@ -2428,21 +2999,237 @@ function onDropToPanel(e) {
   render(); saveData();
 }
 
+// ==================== Task Pool 待安排任务池 ====================
+let dvPoolDragId = null;
+
+// 渲染日视图左侧任务池
+function renderDvPool() {
+  const el = document.getElementById('dvPoolList');
+  if (!el) return;
+  if (!taskPool.length) {
+    el.innerHTML = '<div style="text-align:center;color:#bbb;padding:12px 0;font-size:11px;">暂无待安排任务<br>可在上方输入框添加</div>';
+    return;
+  }
+  el.innerHTML = taskPool.map(p => {
+    const levelClass = `level-${p.level || 'yellow'}`;
+    // 获取绑定 Plan 名称
+    const mt = p.mainTaskId ? mainTasks.find(m => m.id === p.mainTaskId) : null;
+    const planHtml = mt ? `<div class="dv-pool-item-plan">🎯 ${escHtml(mt.name)}</div>` : '';
+    return `<div class="dv-pool-item ${levelClass}" data-pool-id="${p.id}"
+      draggable="true"
+      ondragstart="onPoolItemDragStart(event, ${p.id})"
+      ondragend="onDragEnd(event)">
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:11px;color:#333;line-height:1.4;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">${escHtml(p.name)}</div>
+        ${planHtml}
+      </div>
+      <span class="dv-pool-item-del" onclick="deleteDvPoolTask(${p.id})" title="删除">×</span>
+    </div>`;
+  }).join('');
+}
+
+/**
+ * 初始化日视图任务池中绑定 Plan 的下拉框
+ */
+function initDvPoolPlanSelect() {
+  const sel = document.getElementById('dvPoolNewPlan');
+  if (!sel) return;
+  sel.innerHTML = '<option value="">— 不绑定 Plan —</option>';
+  mainTasks.forEach(m => {
+    const opt = document.createElement('option');
+    opt.value = m.id;
+    opt.textContent = m.name;
+    sel.appendChild(opt);
+  });
+}
+
+/**
+ * 在日视图任务池中直接添加未安排任务
+ */
+function addDvPoolTask() {
+  const nameEl = document.getElementById('dvPoolNewName');
+  const name = nameEl ? nameEl.value.trim() : '';
+  if (!name) { nameEl && nameEl.focus(); return; }
+
+  const level = document.getElementById('dvPoolNewLevel').value || 'yellow';
+  const planSel = document.getElementById('dvPoolNewPlan');
+  const mainTaskId = planSel && planSel.value ? parseInt(planSel.value) : null;
+
+  // 添加到 taskPool
+  taskPool.push({ id: nextId++, name, level, note: '', mainTaskId });
+
+  // 清空输入框
+  nameEl.value = '';
+  if (planSel) planSel.value = '';
+
+  renderDvPool();
+  saveData();
+  nameEl.focus(); // 方便连续添加
+}
+
+/**
+ * 在日视图中删除任务池条目
+ */
+function deleteDvPoolTask(id) {
+  taskPool = taskPool.filter(p => p.id !== id);
+  renderDvPool();
+  saveData();
+}
+
+// 任务池项拖拽开始
+function onPoolItemDragStart(e, id) {
+  dvPoolDragId = id;
+  dragType = 'pool';
+  e.dataTransfer.effectAllowed = 'move';
+  setTimeout(() => {
+    const el = document.querySelector(`.dv-pool-item[data-pool-id="${id}"]`);
+    if (el) el.classList.add('dragging');
+  }, 0);
+}
+
+// 日视图左侧池区域：时间轴拖回任务池
+function onDvPoolDragOver(e) {
+  if (dragType !== 'cal') return;
+  e.preventDefault();
+  document.getElementById('dvPoolCol').classList.add('drag-over-pool');
+}
+
+function onDvPoolDragLeave(e) {
+  const col = document.getElementById('dvPoolCol');
+  if (!col.contains(e.relatedTarget)) col.classList.remove('drag-over-pool');
+}
+
+function onDvPoolDrop(e) {
+  e.preventDefault();
+  document.getElementById('dvPoolCol').classList.remove('drag-over-pool');
+  if (dragType !== 'cal' || draggedId === null) return;
+  // 将已排期任务移回任务池
+  const t = calTasks.find(task => task.id === draggedId);
+  if (t) {
+    taskPool.push({ id: nextId++, name: t.name, level: t.level, note: t.note || '', mainTaskId: t.mainTaskId || null });
+    calTasks = calTasks.filter(task => task.id !== draggedId);
+  }
+  draggedId = null; dragType = null;
+  saveData(); render(); refreshDayViewIfOpen();
+}
+
+// 任务池弹窗状态
+let poolScheduleCtx = { poolId: null, dateStr: null, startH: null };
+
+function openPoolSchedule(poolId, dateStr, startH) {
+  const item = taskPool.find(p => p.id === poolId);
+  if (!item) return;
+  poolScheduleCtx = { poolId, dateStr, startH: startH || 9 };
+
+  document.getElementById('poolScheduleTaskName').textContent = item.name;
+  const [y, m, d] = dateStr.split('-').map(Number);
+  document.getElementById('poolScheduleDate').textContent = `${y}年${m}月${d}日`;
+
+  // 构建开始时间选择器
+  const startSel = document.getElementById('poolScheduleStart');
+  startSel.innerHTML = '';
+  for (let i = 0; i < 48; i++) {
+    const val = i * 0.5;
+    const h = Math.floor(val); const mm = val % 1 === 0 ? '00' : '30';
+    const opt = document.createElement('option');
+    opt.value = val;
+    opt.textContent = `${String(h).padStart(2,'0')}:${mm}`;
+    if (Math.abs(val - (startH || 9)) < 0.01) opt.selected = true;
+    startSel.appendChild(opt);
+  }
+  // 构建时长选择器
+  const durSel = document.getElementById('poolScheduleDur');
+  durSel.innerHTML = '';
+  DURATION_OPTIONS.forEach(d => {
+    const opt = document.createElement('option');
+    opt.value = d.value;
+    opt.textContent = d.label;
+    if (d.value === 1) opt.selected = true;
+    durSel.appendChild(opt);
+  });
+
+  updatePoolSchedulePreview();
+  startSel.onchange = updatePoolSchedulePreview;
+  durSel.onchange = updatePoolSchedulePreview;
+
+  dvPoolDragId = null; dragType = null;
+  document.getElementById('poolScheduleOverlay').classList.add('show');
+}
+
+function updatePoolSchedulePreview() {
+  const s = parseFloat(document.getElementById('poolScheduleStart').value);
+  const d = parseFloat(document.getElementById('poolScheduleDur').value);
+  const e = s + d;
+  const fmt = v => { const h=Math.floor(v),m=v%1===0?'00':'30'; return `${String(h).padStart(2,'0')}:${m}`; };
+  document.getElementById('poolSchedulePreview').textContent = `${fmt(s)} — ${fmt(e)}`;
+  const conflict = checkTimeConflict30(poolScheduleCtx.dateStr, s, e);
+  const conflictEl = document.getElementById('poolScheduleConflict');
+  if (conflict) {
+    conflictEl.textContent = `⛔ 与「${conflict.name}」时间冲突`;
+    conflictEl.style.display = 'block';
+  } else {
+    conflictEl.style.display = 'none';
+  }
+}
+
+function closePoolSchedule() {
+  document.getElementById('poolScheduleOverlay').classList.remove('show');
+  dvPoolDragId = null; dragType = null; poolScheduleCtx = { poolId: null, dateStr: null, startH: null };
+}
+
+function confirmPoolSchedule() {
+  const { poolId, dateStr } = poolScheduleCtx;
+  const item = taskPool.find(p => p.id === poolId);
+  if (!item || !dateStr) { closePoolSchedule(); return; }
+
+  const startH = parseFloat(document.getElementById('poolScheduleStart').value);
+  const dur    = parseFloat(document.getElementById('poolScheduleDur').value);
+  const endH   = startH + dur;
+
+  const conflict = checkTimeConflict30(dateStr, startH, endH);
+  if (conflict) {
+    const fmt = v => { const h=Math.floor(v),m=v%1===0?'00':'30'; return `${String(h).padStart(2,'0')}:${m}`; };
+    alert(`❌ 时间冲突！该时间段已被「${conflict.name}」占用\n(${fmt(conflict.startHour)} - ${fmt(conflict.startHour + parseFloat(conflict.duration))})\n请调整时间。`);
+    return;
+  }
+
+  const [y, m, d] = dateStr.split('-').map(Number);
+  calTasks.push({
+    id: nextId++, name: item.name, level: item.level, note: item.note || '', done: false,
+    year: y, month: m, day: d,
+    startHour: startH, duration: dur,
+    mainTaskId: item.mainTaskId || null,
+    subtasks: [],
+  });
+  // 从任务池移除
+  taskPool = taskPool.filter(p => p.id !== poolId);
+
+  closePoolSchedule();
+  saveData(); render(); refreshDayViewIfOpen();
+}
+
 // ==================== 数据持久化 ====================
 function saveData() {
   try {
-    localStorage.setItem('calendar_v3', JSON.stringify({
-      mainTasks, calTasks, nextId, currentYear, currentMonth
+    localStorage.setItem('calendar_v4', JSON.stringify({
+      mainTasks, calTasks, taskPool, nextId, currentYear, currentMonth
     }));
   } catch(e) { console.warn('localStorage write failed', e); }
 }
 
 function loadData() {
   try {
-    const raw = localStorage.getItem('calendar_v3') || localStorage.getItem('calendar_v2');
+    const raw = localStorage.getItem('calendar_v4')
+             || localStorage.getItem('calendar_v3')
+             || localStorage.getItem('calendar_v2');
     if (!raw) return;
     const d = JSON.parse(raw);
-    if (d.mainTasks)    mainTasks    = d.mainTasks;
+    if (d.mainTasks) {
+      mainTasks = d.mainTasks.map(m => {
+        if (!m.deadline) m.deadline = null;
+        return m;
+      });
+    }
     if (d.calTasks) {
       calTasks = d.calTasks.map(t => {
         if (t.duration === undefined && t.startHour !== undefined && t.endHour !== undefined) {
@@ -2453,6 +3240,7 @@ function loadData() {
         return t;
       });
     }
+    if (Array.isArray(d.taskPool)) taskPool = d.taskPool;
     if (d.nextId)       nextId       = d.nextId;
     if (d.currentYear)  currentYear  = d.currentYear;
     if (d.currentMonth) currentMonth = d.currentMonth;
@@ -2465,6 +3253,22 @@ function escHtml(s) {
   return String(s)
     .replace(/&/g,'&amp;').replace(/</g,'&lt;')
     .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// Toast 通知
+function showToast(msg, color = '#333') {
+  const toast = document.createElement('div');
+  toast.style.cssText = `
+    position:fixed;bottom:30px;left:50%;transform:translateX(-50%);
+    background:${color};color:white;padding:12px 24px;border-radius:30px;
+    font-size:15px;font-weight:600;z-index:99999;
+    box-shadow:0 4px 20px rgba(0,0,0,0.2);
+    animation:toastIn 0.3s ease,toastOut 0.3s ease 2.5s forwards;
+    white-space:nowrap;
+  `;
+  toast.textContent = msg;
+  document.body.appendChild(toast);
+  setTimeout(() => toast.remove(), 3000);
 }
 
 // 启动
