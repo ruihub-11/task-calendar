@@ -157,6 +157,26 @@
   .task-edit-btn:hover { opacity: 1 !important; }
 
   /* 导出数据区域 */
+  /* 月视图拖拽删除区域 */
+  .trash-drop-zone {
+    margin: 10px 0 4px;
+    border: 2px dashed #ddd;
+    border-radius: 10px;
+    padding: 9px 16px;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    color: #bbb; font-size: 13px; cursor: default;
+    transition: all 0.2s;
+    user-select: none;
+  }
+  .trash-drop-zone.drag-over {
+    border-color: #ff4d4f;
+    background: rgba(255, 77, 79, 0.06);
+    color: #ff4d4f;
+    transform: scale(1.01);
+  }
+  .trash-icon { font-size: 18px; line-height: 1; }
+  .trash-label { font-size: 12px; }
+
   .export-area {
     padding: 8px 14px 12px;
     border-top: 1px solid #f0f0f0;
@@ -377,13 +397,22 @@
     flex-wrap: nowrap; overflow: hidden; align-items: center;
   }
   .dv-task-btn {
-    font-size: 9px; padding: 2px 5px; border-radius: 3px;
+    font-size: 10px; padding: 3px 7px; border-radius: 4px;
     border: none; cursor: pointer; transition: all 0.15s; flex-shrink: 0;
     background: rgba(255,255,255,0.22); color: white; white-space: nowrap;
-    line-height: 1.3;
+    line-height: 1.4; font-weight: 600;
   }
   .dv-task-btn:hover { background: rgba(255,255,255,0.42); }
   .dv-task-btn.undo-btn { background: rgba(255,255,255,0.18); }
+  /* 删除按钮专属样式：稍大 + hover 变红 */
+  .dv-task-btn.del-btn {
+    font-size: 12px; padding: 3px 7px;
+    background: rgba(255,255,255,0.15);
+  }
+  .dv-task-btn.del-btn:hover {
+    background: rgba(255, 77, 79, 0.85);
+    color: white;
+  }
   .dv-bg-red    { background: linear-gradient(135deg, #ff4d4f, #ff7875); }
   .dv-bg-yellow { background: linear-gradient(135deg, #c49900, #ddb800); }
   .dv-bg-green  { background: linear-gradient(135deg, #52c41a, #73d13d); }
@@ -716,6 +745,38 @@
   }
   .pool-schedule-modal h3 { font-size: 16px; margin-bottom: 14px; color: #333; }
 
+  /* 任务池安排弹窗子任务区域 */
+  .ps-subtask-add-row {
+    display: flex; gap: 6px; margin-bottom: 4px;
+  }
+  .ps-subtask-input {
+    flex: 1; padding: 6px 9px; border: 1.5px solid #e8e8e8;
+    border-radius: 7px; font-size: 12px; outline: none; font-family: inherit;
+  }
+  .ps-subtask-input:focus { border-color: #43b89c; }
+  .ps-subtask-add-btn {
+    padding: 6px 10px; background: #43b89c; color: white;
+    border: none; border-radius: 7px; cursor: pointer; font-size: 14px;
+    font-weight: 700; flex-shrink: 0;
+  }
+  .ps-subtask-add-btn:hover { background: #2a9d8f; }
+  .ps-subtask-list {
+    display: flex; flex-direction: column; gap: 3px;
+    max-height: 120px; overflow-y: auto;
+  }
+  .ps-subtask-item {
+    display: flex; align-items: center; gap: 6px;
+    padding: 4px 8px; background: #f8f8f8; border-radius: 6px;
+    font-size: 12px; color: #444;
+  }
+  .ps-subtask-name { flex: 1; }
+  .ps-subtask-del {
+    color: #ccc; cursor: pointer; font-size: 13px; flex-shrink: 0;
+  }
+  .ps-subtask-del:hover { color: #ff4d4f; }
+
+
+
   /* ===== 详情弹窗编辑模式 ===== */
   .td-edit-section {
     background: #f7f8fa;
@@ -921,6 +982,14 @@
       <div class="weekday-cell weekend">周六</div>
     </div>
     <div class="calendar-grid" id="calendarGrid"></div>
+    <!-- 月视图底部：拖拽删除区域（任务拖到此处可删除） -->
+    <div class="trash-drop-zone" id="trashDropZone"
+      ondragover="onTrashDragOver(event)"
+      ondragleave="onTrashDragLeave(event)"
+      ondrop="onTrashDrop(event)">
+      <span class="trash-icon">🗑</span>
+      <span class="trash-label">拖到这里删除任务</span>
+    </div>
   </div>
 </div>
 
@@ -1090,12 +1159,32 @@
     <div style="font-size:13px;color:#666;margin-bottom:12px;">
       将「<strong id="poolScheduleTaskName"></strong>」安排到 <strong id="poolScheduleDate"></strong>
     </div>
+
     <label style="font-size:13px;color:#666;display:block;margin-bottom:4px;">开始时间</label>
     <select id="poolScheduleStart" style="width:100%;padding:8px;border:1.5px solid #e8e8e8;border-radius:8px;font-size:13px;outline:none;"></select>
+
     <label style="font-size:13px;color:#666;display:block;margin-top:10px;margin-bottom:4px;">时长</label>
     <select id="poolScheduleDur" style="width:100%;padding:8px;border:1.5px solid #e8e8e8;border-radius:8px;font-size:13px;outline:none;"></select>
     <div id="poolSchedulePreview" style="font-size:11px;color:#888;margin-top:4px;"></div>
     <div id="poolScheduleConflict" style="font-size:11px;color:#ff4d4f;margin-top:4px;display:none;"></div>
+
+    <!-- 重要性选择（新增） -->
+    <label style="font-size:13px;color:#666;display:block;margin-top:10px;margin-bottom:4px;">重要性</label>
+    <select id="poolScheduleLevel" style="width:100%;padding:8px;border:1.5px solid #e8e8e8;border-radius:8px;font-size:13px;outline:none;">
+      <option value="red">🔴 重要</option>
+      <option value="yellow" selected>🟡 一般</option>
+      <option value="green">🟢 轻松</option>
+    </select>
+
+    <!-- 子任务输入（新增） -->
+    <label style="font-size:13px;color:#666;display:block;margin-top:10px;margin-bottom:4px;">子任务（可选）</label>
+    <div class="ps-subtask-add-row">
+      <input type="text" id="psSubtaskInput" class="ps-subtask-input" placeholder="输入子任务后按 Enter 或点击 +"
+        onkeydown="if(event.key==='Enter'){event.preventDefault();addPsSubtask();}" />
+      <button class="ps-subtask-add-btn" onclick="addPsSubtask()">+</button>
+    </div>
+    <div id="psSubtaskList" class="ps-subtask-list"></div>
+
     <div class="modal-btns" style="margin-top:16px;">
       <button class="btn-cancel" onclick="closePoolSchedule()">取消</button>
       <button class="btn-confirm" onclick="confirmPoolSchedule()">✓ 安排</button>
@@ -1193,13 +1282,19 @@ for (let i = 0; i <= 48; i++) {
   const m = i % 2 === 0 ? '00' : '30';
   HOUR_LABELS.push(`${String(h).padStart(2,'0')}:${m}`);
 }
-// 时长选项（30min步进）
+// 时长选项（30min步进，从 30min 到 8h）
 const DURATION_OPTIONS = [
   { value: 0.5, label: '30min' },
   { value: 1,   label: '1h'    },
   { value: 1.5, label: '1.5h'  },
   { value: 2,   label: '2h'    },
+  { value: 2.5, label: '2.5h'  },
   { value: 3,   label: '3h'    },
+  { value: 3.5, label: '3.5h'  },
+  { value: 4,   label: '4h'    },
+  { value: 5,   label: '5h'    },
+  { value: 6,   label: '6h'    },
+  { value: 8,   label: '8h'    },
 ];
 
 // 每日励志语
@@ -1655,7 +1750,8 @@ function confirmProgress() {
 }
 
 function undoCalTask(id) {
-  const t = calTasks.find(t => t.id === id);
+  const numId = Number(id);
+  const t = calTasks.find(t => t.id === numId);
   if (!t || !t.done) return;
   if (t.mainTaskId) {
     const mt = mainTasks.find(m => m.id === t.mainTaskId);
@@ -1777,16 +1873,17 @@ function renderDayViewBlock(t, minH = 0) {
         ? `<button class="dv-task-btn undo-btn" onclick="event.stopPropagation();dvUndo(${t.id})">↩</button>`
         : `<button class="dv-task-btn" onclick="event.stopPropagation();dvComplete(${t.id})">✓</button>`}
       <button class="dv-task-btn" onclick="openTaskDetail(${t.id});return false;">📋</button>
-      <button class="dv-task-btn" onclick="event.stopPropagation();dvDelete(${t.id})">✕</button>
+      <button class="dv-task-btn del-btn" onclick="event.stopPropagation();dvDelete(${t.id})" title="删除">✕</button>
     </div>
   </div>`;
 }
 
 // 日视图内操作
 function dvComplete(id) {
-  const t = calTasks.find(t => t.id === id);
+  const numId = Number(id);
+  const t = calTasks.find(t => t.id === numId);
   if (!t) return;
-  currentClickedTaskId = id;
+  currentClickedTaskId = numId;
 
   // 手动完成主任务时，同时标记所有子任务为完成
   if (Array.isArray(t.subtasks) && t.subtasks.length > 0) {
@@ -1816,8 +1913,25 @@ function dvUndo(id) {
   refreshDayViewIfOpen();
 }
 
+/**
+ * 删除日视图/月视图中的任务
+ * 若任务已完成且绑定了 Plan，自动扣除对应 Plan 的 doneHours
+ */
 function dvDelete(id) {
-  calTasks = calTasks.filter(t => t.id !== id);
+  // 转为数字确保类型一致
+  const numId = Number(id);
+  const task = calTasks.find(t => t.id === numId);
+
+  if (task && task.done && task.mainTaskId) {
+    // 已完成任务删除 → 回退 Plan 进度
+    const plan = mainTasks.find(m => m.id === task.mainTaskId);
+    if (plan) {
+      const dur = parseFloat(task.duration) || 0;
+      plan.doneHours = Math.max(0, parseFloat((plan.doneHours - dur).toFixed(2)));
+    }
+  }
+
+  calTasks = calTasks.filter(t => t.id !== numId);
   render(); saveData();
   refreshDayViewIfOpen();
 }
@@ -2028,8 +2142,12 @@ let currentDetailTaskId = null;
  * 触发方式：点击日视图中任务 block 上的"📋"按钮
  */
 function openTaskDetail(id) {
-  currentDetailTaskId = id;
-  const t = calTasks.find(task => task.id === id);
+  // 防御：强制转数字，避免字符串 id 与数字 id 比较失败
+  const numId = Number(id);
+  if (!numId) return;
+
+  currentDetailTaskId = numId;
+  const t = calTasks.find(task => task.id === numId);
   if (!t) {
     alert('任务不存在！');
     return;
@@ -2283,12 +2401,15 @@ function confirmTdEdit() {
     refreshDayViewIfOpen();
   }
 
+  // 保存 id（closeTaskDetail 会将 currentDetailTaskId 置为 null，须提前缓存）
+  const savedId = currentDetailTaskId;
+
   // 关闭详情弹窗
   closeTaskDetail();
 
-  // 重新打开详情弹窗显示新数据
+  // 重新打开详情弹窗显示新数据（使用缓存的 savedId，避免 null 导致「任务不存在」）
   setTimeout(() => {
-    openTaskDetail(currentDetailTaskId);
+    openTaskDetail(savedId);
   }, 100);
 }
 
@@ -2383,14 +2504,19 @@ function tdMarkDone() {
   if (!currentDetailTaskId) return;
   const t = calTasks.find(task => task.id === currentDetailTaskId);
   if (!t) return;
+
+  // 缓存 id：后续操作（closeTaskDetail / dvUndo）会将 currentDetailTaskId 置 null
+  const savedId = currentDetailTaskId;
+
   if (t.done) {
-    dvUndo(currentDetailTaskId);
+    // 撤回完成：不关闭弹窗，直接撤回后刷新
+    dvUndo(savedId);
+    setTimeout(() => openTaskDetail(savedId), 50);
   } else {
+    // 标记完成：先关闭弹窗再执行完成逻辑
     closeTaskDetail();
-    setTimeout(() => dvComplete(currentDetailTaskId), 100);
-    return;
+    setTimeout(() => dvComplete(savedId), 100);
   }
-  setTimeout(() => openTaskDetail(currentDetailTaskId), 50);
 }
 
 function tdDelete() {
@@ -2846,6 +2972,59 @@ function onDragEnd(e) {
   document.querySelectorAll('.drag-over-cell').forEach(el => el.classList.remove('drag-over-cell'));
   document.querySelectorAll('.drag-preview').forEach(el => el.remove());
   document.getElementById('taskPanel').classList.remove('drag-over');
+  // 清除垃圾桶高亮
+  const trash = document.getElementById('trashDropZone');
+  if (trash) trash.classList.remove('drag-over');
+}
+
+// ==================== 月视图垃圾桶删除区域 ====================
+/**
+ * 拖拽进入垃圾桶区域：高亮
+ */
+function onTrashDragOver(e) {
+  // 只接受月视图中的日历任务（dragType === 'cal'）
+  if (dragType !== 'cal') return;
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'move';
+  document.getElementById('trashDropZone').classList.add('drag-over');
+}
+
+/**
+ * 拖拽离开垃圾桶区域：取消高亮
+ */
+function onTrashDragLeave(e) {
+  document.getElementById('trashDropZone').classList.remove('drag-over');
+}
+
+/**
+ * 拖拽放入垃圾桶：确认后删除任务，同步更新进度和 localStorage
+ */
+function onTrashDrop(e) {
+  e.preventDefault();
+  document.getElementById('trashDropZone').classList.remove('drag-over');
+
+  if (dragType !== 'cal' || !draggedId) return;
+
+  const task = calTasks.find(t => t.id === draggedId);
+  draggedId = null; dragType = null;
+
+  if (!task) return;
+  if (!confirm(`删除任务「${task.name}」？\n该操作不可恢复。`)) return;
+
+  // 若任务已完成且绑定了 Plan，需要回退进度
+  if (task.done && task.mainTaskId) {
+    const plan = mainTasks.find(m => m.id === task.mainTaskId);
+    if (plan) {
+      const dur = parseFloat(task.duration) || 0;
+      plan.doneHours = Math.max(0, (plan.doneHours || 0) - dur);
+    }
+  }
+
+  // 删除任务
+  calTasks = calTasks.filter(t => t.id !== task.id);
+
+  render(); saveData(); refreshDayViewIfOpen();
+  showToast(`🗑 已删除「${task.name}」`, '#ff4d4f');
 }
 
 function onDayCellDragOver(e, day) {
@@ -3143,6 +3322,48 @@ function onDvPoolDrop(e) {
 // 任务池弹窗状态
 let poolScheduleCtx = { poolId: null, dateStr: null, startH: null };
 
+// 任务池安排弹窗临时子任务数组
+let psSubtasks = [];
+
+/**
+ * 渲染弹窗中的子任务列表
+ */
+function renderPsSubtaskList() {
+  const el = document.getElementById('psSubtaskList');
+  if (!el) return;
+  if (!psSubtasks.length) {
+    el.innerHTML = '<div style="font-size:11px;color:#bbb;padding:2px 0;">暂无子任务</div>';
+    return;
+  }
+  el.innerHTML = psSubtasks.map((s, i) =>
+    `<div class="ps-subtask-item">
+      <span class="ps-subtask-name">${escHtml(s)}</span>
+      <span class="ps-subtask-del" onclick="removePsSubtask(${i})">×</span>
+    </div>`
+  ).join('');
+}
+
+/**
+ * 在弹窗中添加一条子任务
+ */
+function addPsSubtask() {
+  const inp = document.getElementById('psSubtaskInput');
+  const text = inp ? inp.value.trim() : '';
+  if (!text) return;
+  psSubtasks.push(text);
+  inp.value = '';
+  renderPsSubtaskList();
+  inp.focus();
+}
+
+/**
+ * 删除弹窗中某条子任务
+ */
+function removePsSubtask(index) {
+  psSubtasks.splice(index, 1);
+  renderPsSubtaskList();
+}
+
 function openPoolSchedule(poolId, dateStr, startH) {
   const item = taskPool.find(p => p.id === poolId);
   if (!item) return;
@@ -3151,6 +3372,14 @@ function openPoolSchedule(poolId, dateStr, startH) {
   document.getElementById('poolScheduleTaskName').textContent = item.name;
   const [y, m, d] = dateStr.split('-').map(Number);
   document.getElementById('poolScheduleDate').textContent = `${y}年${m}月${d}日`;
+
+  // 重要性预填（使用任务池中已有的 level，默认 yellow）
+  const levelSel = document.getElementById('poolScheduleLevel');
+  if (levelSel) levelSel.value = item.level || 'yellow';
+
+  // 初始化子任务（每次打开从空开始）
+  psSubtasks = [];
+  renderPsSubtaskList();
 
   // 构建开始时间选择器
   const startSel = document.getElementById('poolScheduleStart');
@@ -3181,6 +3410,11 @@ function openPoolSchedule(poolId, dateStr, startH) {
 
   dvPoolDragId = null; dragType = null;
   document.getElementById('poolScheduleOverlay').classList.add('show');
+  // 聚焦到子任务输入框方便直接输入
+  setTimeout(() => {
+    const inp = document.getElementById('psSubtaskInput');
+    if (inp) inp.blur();
+  }, 50);
 }
 
 function updatePoolSchedulePreview() {
@@ -3202,6 +3436,8 @@ function updatePoolSchedulePreview() {
 function closePoolSchedule() {
   document.getElementById('poolScheduleOverlay').classList.remove('show');
   dvPoolDragId = null; dragType = null; poolScheduleCtx = { poolId: null, dateStr: null, startH: null };
+  // 清空临时子任务
+  psSubtasks = [];
 }
 
 function confirmPoolSchedule() {
@@ -3220,13 +3456,28 @@ function confirmPoolSchedule() {
     return;
   }
 
+  // 读取重要性（新增）
+  const levelSel = document.getElementById('poolScheduleLevel');
+  const level = levelSel ? levelSel.value : (item.level || 'yellow');
+
+  // 读取子任务（新增），转为 {id, name, done} 格式，与主流程一致
+  let subtaskIdCtr = nextId;
+  const subtasksArr = psSubtasks.map(name => ({
+    id: subtaskIdCtr++,
+    name,
+    done: false
+  }));
+  nextId = subtaskIdCtr;
+
   const [y, m, d] = dateStr.split('-').map(Number);
   calTasks.push({
-    id: nextId++, name: item.name, level: item.level, note: item.note || '', done: false,
+    id: nextId++, name: item.name,
+    level,                        // 使用弹窗中选定的重要性
+    note: item.note || '', done: false,
     year: y, month: m, day: d,
     startHour: startH, duration: dur,
     mainTaskId: item.mainTaskId || null,
-    subtasks: [],
+    subtasks: subtasksArr,        // 子任务
   });
   // 从任务池移除
   taskPool = taskPool.filter(p => p.id !== poolId);
