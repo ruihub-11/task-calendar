@@ -177,6 +177,84 @@
   .trash-icon { font-size: 18px; line-height: 1; }
   .trash-label { font-size: 12px; }
 
+  /* ===== Plan 子任务（目标拆解）样式 ===== */
+  /* 创建/编辑弹窗中的子任务区域 */
+  .plan-sub-section { margin-top: 10px; }
+  .plan-sub-section label { font-size: 13px; color: #666; display: block; margin-bottom: 5px; }
+  .plan-sub-add-row { display: flex; gap: 6px; margin-bottom: 5px; }
+  .plan-sub-input {
+    flex: 1; padding: 6px 9px; border: 1.5px solid #e8e8e8;
+    border-radius: 7px; font-size: 12px; outline: none; font-family: inherit;
+  }
+  .plan-sub-input:focus { border-color: #667eea; }
+  .plan-sub-add-btn {
+    padding: 6px 10px; background: #667eea; color: white;
+    border: none; border-radius: 7px; cursor: pointer; font-size: 14px; font-weight: 700;
+  }
+  .plan-sub-add-btn:hover { background: #5469d4; }
+  .plan-sub-list { display: flex; flex-direction: column; gap: 3px; max-height: 130px; overflow-y: auto; }
+  .plan-sub-item {
+    display: flex; align-items: center; gap: 7px;
+    padding: 4px 8px; background: #f8f8f8; border-radius: 6px; font-size: 12px;
+  }
+  .plan-sub-check {
+    width: 14px; height: 14px; border: 1.5px solid #ccc; border-radius: 3px;
+    cursor: pointer; flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+    transition: all 0.15s;
+  }
+  .plan-sub-item.done .plan-sub-check { background: #52c41a; border-color: #52c41a; }
+  .plan-sub-item.done .plan-sub-check::after { content: '✓'; color: white; font-size: 9px; }
+  .plan-sub-name { flex: 1; color: #444; }
+  .plan-sub-item.done .plan-sub-name { text-decoration: line-through; color: #bbb; }
+  .plan-sub-del { color: #ccc; cursor: pointer; font-size: 13px; flex-shrink: 0; }
+  .plan-sub-del:hover { color: #ff4d4f; }
+  /* Plan 卡片中的子任务摘要徽章 */
+  .plan-sub-badge {
+    font-size: 10px; color: #888; padding: 1px 6px;
+    background: #f3f3f3; border-radius: 10px; margin-top: 3px;
+    display: inline-block;
+  }
+  .plan-sub-badge.all-done { color: #52c41a; background: #f6ffed; }
+
+  /* ===== 任务池子任务样式 ===== */
+  .pool-sub-toggle {
+    font-size: 10px; color: #667eea; cursor: pointer; margin-top: 2px; user-select: none;
+  }
+  .pool-sub-expand {
+    margin-top: 4px; display: none; flex-direction: column; gap: 2px;
+  }
+  .pool-sub-expand.open { display: flex; }
+  .pool-sub-mini-item {
+    display: flex; align-items: center; gap: 5px;
+    font-size: 10px; color: #666; padding: 2px 4px;
+    background: rgba(255,255,255,0.5); border-radius: 4px;
+  }
+  .pool-sub-mini-check {
+    width: 11px; height: 11px; border: 1.5px solid #ccc; border-radius: 2px;
+    cursor: pointer; flex-shrink: 0;
+  }
+  .pool-sub-mini-item.done .pool-sub-mini-check { background: #52c41a; border-color: #52c41a; }
+  /* 任务池添加表单中的子任务输入 */
+  .pool-form-sub-section { margin-top: 5px; }
+  .pool-form-sub-add-row { display: flex; gap: 4px; margin-bottom: 3px; }
+  .pool-form-sub-input {
+    flex: 1; padding: 4px 7px; border: 1.5px solid #e0e0e0;
+    border-radius: 5px; font-size: 11px; outline: none; font-family: inherit;
+  }
+  .pool-form-sub-input:focus { border-color: #667eea; }
+  .pool-form-sub-add-btn {
+    padding: 4px 8px; background: #667eea; color: white;
+    border: none; border-radius: 5px; cursor: pointer; font-size: 12px; font-weight: 700;
+  }
+  .pool-form-sub-list { display: flex; flex-direction: column; gap: 2px; max-height: 80px; overflow-y: auto; }
+  .pool-form-sub-item {
+    display: flex; align-items: center; gap: 5px;
+    padding: 3px 6px; background: #f5f5f5; border-radius: 4px; font-size: 11px; color: #444;
+  }
+  .pool-form-sub-name { flex: 1; }
+  .pool-form-sub-del { color: #ccc; cursor: pointer; font-size: 12px; }
+  .pool-form-sub-del:hover { color: #ff4d4f; }
+
   .export-area {
     padding: 8px 14px 12px;
     border-top: 1px solid #f0f0f0;
@@ -955,6 +1033,18 @@
         <input type="date" id="newTaskDeadline" style="flex:1;" />
       </div>
       <textarea id="newTaskNote" placeholder="备注（可选）..." style="min-height:38px;font-size:13px;border:1.5px solid #e8e8e8;border-radius:8px;padding:7px 10px;resize:vertical;outline:none;" onfocus="this.style.borderColor='#667eea'" onblur="this.style.borderColor='#e8e8e8'"></textarea>
+
+      <!-- Plan 子任务（目标拆解，可选） -->
+      <div class="plan-sub-section">
+        <label>阶段目标（可选）</label>
+        <div class="plan-sub-add-row">
+          <input type="text" id="newPlanSubInput" class="plan-sub-input" placeholder="添加阶段目标，按 Enter 确认"
+            onkeydown="if(event.key==='Enter'){event.preventDefault();addNewPlanSub();}" />
+          <button class="plan-sub-add-btn" onclick="addNewPlanSub()">+</button>
+        </div>
+        <div class="plan-sub-list" id="newPlanSubList"></div>
+      </div>
+
       <button class="add-btn" onclick="addMainTask()">＋ 添加</button>
     </div>
 
@@ -1074,6 +1164,15 @@
           <!-- 绑定 Plan（可选） -->
           <select id="dvPoolNewPlan" class="dv-pool-select" style="font-size:10px;"></select>
           <button class="dv-pool-add-btn" onclick="addDvPoolTask()">+ 加入</button>
+          <!-- 任务池子任务（执行步骤，可选） -->
+          <div class="pool-form-sub-section" id="poolFormSubSection">
+            <div class="pool-form-sub-add-row">
+              <input type="text" id="poolFormSubInput" class="pool-form-sub-input" placeholder="步骤（可选）"
+                onkeydown="if(event.key==='Enter'){event.preventDefault();addPoolFormSub();}" />
+              <button class="pool-form-sub-add-btn" onclick="addPoolFormSub()">+</button>
+            </div>
+            <div class="pool-form-sub-list" id="poolFormSubList"></div>
+          </div>
         </div>
         <!-- 任务池列表 -->
         <div id="dvPoolList"></div>
@@ -1227,6 +1326,18 @@
     <input type="date" id="editPlanDeadline" />
     <label>备注（可选）</label>
     <textarea id="editPlanNote" placeholder="备注内容..."></textarea>
+
+    <!-- Plan 子任务编辑区 -->
+    <div class="plan-sub-section">
+      <label>阶段目标</label>
+      <div class="plan-sub-add-row">
+        <input type="text" id="editPlanSubInput" class="plan-sub-input" placeholder="新增阶段目标，按 Enter 确认"
+          onkeydown="if(event.key==='Enter'){event.preventDefault();addEditPlanSub();}" />
+        <button class="plan-sub-add-btn" onclick="addEditPlanSub()">+</button>
+      </div>
+      <div class="plan-sub-list" id="editPlanSubList"></div>
+    </div>
+
     <div class="modal-btns">
       <button class="btn-cancel" onclick="closeEditPlan()">取消</button>
       <button class="btn-confirm" onclick="confirmEditPlan()">✓ 保存修改</button>
@@ -1237,16 +1348,20 @@
 <script>
 // =================================================================
 //   数据结构
-//   mainTasks: [{id, name, level, note, done, totalHours, doneHours, deadline}]
+//   mainTasks: [{id, name, level, note, done, totalHours, doneHours, deadline,
+//                planSubtasks:[{id,name,done}]   // Plan 的"阶段目标"（目标拆解）
+//               }]
 //   calTasks:  [{id, name, level, note, done,
 //                year, month, day,
 //                startHour,   // 数值，支持 0.5 步进（如 9.5 = 09:30）
 //                duration,    // duration 驱动（小时数，可小数，如 0.5 = 30min）
 //                mainTaskId,
-//                subtasks:[{id,name,done}]
+//                subtasks:[{id,name,done}]  // 日程任务的"执行步骤"
 //               }]
-//   taskPool:  [{id, name, level, note, mainTaskId}]  // 待安排任务池
-// =================================================================
+//   taskPool:  [{id, name, level, note, mainTaskId,
+//                subtasks:[{id,name,done}]  // 任务池任务的"执行步骤"（拖入时间轴后保留）
+//               }]
+// ================================================================= 
 let currentYear  = 2026;
 let currentMonth = 4;
 let mainTasks = [];
@@ -1452,6 +1567,12 @@ function renderMainTasks() {
       const deadlineHtml = t.deadline
         ? `<span style="color:#aaa;font-size:10px;margin-left:6px;">截止: ${t.deadline}</span>`
         : '';
+      // planSubtasks 摘要徽章（阶段目标进度）
+      const subs = Array.isArray(t.planSubtasks) ? t.planSubtasks : [];
+      const subsDone = subs.filter(s => s.done).length;
+      const subsBadgeHtml = subs.length > 0
+        ? `<span class="plan-sub-badge ${subsDone === subs.length ? 'all-done' : ''}">✓ ${subsDone}/${subs.length}</span>`
+        : '';
       html += `
         <div class="task-item level-${level} ${t.done ? 'done' : ''}" id="mt-${t.id}"
              draggable="true"
@@ -1462,6 +1583,7 @@ function renderMainTasks() {
             <div style="flex:1; min-width:0;">
               <div class="task-name">${escHtml(t.name)}</div>
               ${t.note ? `<div class="task-note">${escHtml(t.note)}</div>` : ''}
+              ${subsBadgeHtml}
             </div>
             <!-- 编辑按钮：铅笔图标 -->
             <span class="task-edit-btn" onclick="openEditPlan(${t.id})" title="编辑 Plan">✏️</span>
@@ -1590,6 +1712,138 @@ function renderStats() {
   bar.innerHTML = html;
 }
 
+// ==================== Plan 子任务（目标拆解）管理 ====================
+// 创建 Plan 时临时存储的子任务列表（每次打开表单时重置）
+let newPlanSubtasks = [];
+
+/**
+ * 渲染"创建 Plan 表单"中的阶段目标列表
+ */
+function renderNewPlanSubList() {
+  const el = document.getElementById('newPlanSubList');
+  if (!el) return;
+  if (!newPlanSubtasks.length) { el.innerHTML = ''; return; }
+  el.innerHTML = newPlanSubtasks.map((s, i) => `
+    <div class="plan-sub-item ${s.done ? 'done' : ''}">
+      <div class="plan-sub-check" onclick="toggleNewPlanSub(${i})"></div>
+      <span class="plan-sub-name">${escHtml(s.name)}</span>
+      <span class="plan-sub-del" onclick="removeNewPlanSub(${i})">×</span>
+    </div>`).join('');
+}
+
+/** 添加一条阶段目标（创建表单） */
+function addNewPlanSub() {
+  const inp = document.getElementById('newPlanSubInput');
+  const text = inp ? inp.value.trim() : '';
+  if (!text) return;
+  newPlanSubtasks.push({ id: nextId++, name: text, done: false });
+  inp.value = '';
+  renderNewPlanSubList();
+  inp.focus();
+}
+
+/** 勾选/取消阶段目标（创建表单） */
+function toggleNewPlanSub(idx) {
+  if (newPlanSubtasks[idx]) newPlanSubtasks[idx].done = !newPlanSubtasks[idx].done;
+  renderNewPlanSubList();
+}
+
+/** 删除一条阶段目标（创建表单） */
+function removeNewPlanSub(idx) {
+  newPlanSubtasks.splice(idx, 1);
+  renderNewPlanSubList();
+}
+
+// -------- 编辑 Plan 弹窗中的阶段目标 --------
+
+/**
+ * 渲染"编辑 Plan 弹窗"中的阶段目标列表
+ * t = 当前 Plan 对象（直接引用，实时操作）
+ */
+function renderEditPlanSubList() {
+  const t = editingPlanId ? mainTasks.find(m => m.id === editingPlanId) : null;
+  const el = document.getElementById('editPlanSubList');
+  if (!el || !t) return;
+  const subs = Array.isArray(t.planSubtasks) ? t.planSubtasks : [];
+  if (!subs.length) { el.innerHTML = '<div style="font-size:11px;color:#bbb;padding:2px 0;">暂无阶段目标</div>'; return; }
+  el.innerHTML = subs.map((s, i) => `
+    <div class="plan-sub-item ${s.done ? 'done' : ''}">
+      <div class="plan-sub-check" onclick="toggleEditPlanSub(${i})"></div>
+      <span class="plan-sub-name">${escHtml(s.name)}</span>
+      <span class="plan-sub-del" onclick="removeEditPlanSub(${i})">×</span>
+    </div>`).join('');
+}
+
+/** 添加一条阶段目标（编辑弹窗） */
+function addEditPlanSub() {
+  const t = editingPlanId ? mainTasks.find(m => m.id === editingPlanId) : null;
+  if (!t) return;
+  const inp = document.getElementById('editPlanSubInput');
+  const text = inp ? inp.value.trim() : '';
+  if (!text) return;
+  if (!Array.isArray(t.planSubtasks)) t.planSubtasks = [];
+  t.planSubtasks.push({ id: nextId++, name: text, done: false });
+  inp.value = '';
+  renderEditPlanSubList();
+  saveData();
+  inp.focus();
+}
+
+/** 勾选/取消阶段目标（编辑弹窗） */
+function toggleEditPlanSub(idx) {
+  const t = editingPlanId ? mainTasks.find(m => m.id === editingPlanId) : null;
+  if (!t || !Array.isArray(t.planSubtasks)) return;
+  t.planSubtasks[idx].done = !t.planSubtasks[idx].done;
+  renderEditPlanSubList();
+  renderMainTasks(); // 同步更新卡片摘要
+  saveData();
+}
+
+/** 删除一条阶段目标（编辑弹窗） */
+function removeEditPlanSub(idx) {
+  const t = editingPlanId ? mainTasks.find(m => m.id === editingPlanId) : null;
+  if (!t || !Array.isArray(t.planSubtasks)) return;
+  t.planSubtasks.splice(idx, 1);
+  renderEditPlanSubList();
+  renderMainTasks();
+  saveData();
+}
+
+// ==================== 任务池子任务（执行步骤）管理 ====================
+// 添加任务到任务池时的临时子任务列表（每次添加后清空）
+let poolFormSubtasks = [];
+
+/**
+ * 渲染任务池添加表单中的子任务列表
+ */
+function renderPoolFormSubList() {
+  const el = document.getElementById('poolFormSubList');
+  if (!el) return;
+  if (!poolFormSubtasks.length) { el.innerHTML = ''; return; }
+  el.innerHTML = poolFormSubtasks.map((s, i) => `
+    <div class="pool-form-sub-item">
+      <span class="pool-form-sub-name">${escHtml(s.name)}</span>
+      <span class="pool-form-sub-del" onclick="removePoolFormSub(${i})">×</span>
+    </div>`).join('');
+}
+
+/** 添加一条步骤（任务池表单） */
+function addPoolFormSub() {
+  const inp = document.getElementById('poolFormSubInput');
+  const text = inp ? inp.value.trim() : '';
+  if (!text) return;
+  poolFormSubtasks.push({ id: nextId++, name: text, done: false });
+  inp.value = '';
+  renderPoolFormSubList();
+  inp.focus();
+}
+
+/** 删除一条步骤（任务池表单） */
+function removePoolFormSub(idx) {
+  poolFormSubtasks.splice(idx, 1);
+  renderPoolFormSubList();
+}
+
 // ==================== 总任务区操作 ====================
 function addMainTask() {
   const name = document.getElementById('newTaskName').value.trim();
@@ -1598,11 +1852,20 @@ function addMainTask() {
   const note       = document.getElementById('newTaskNote').value.trim();
   const totalHours = parseFloat(document.getElementById('newTaskTotalHours').value) || 0;
   const deadline   = document.getElementById('newTaskDeadline').value || null;
-  mainTasks.push({ id: nextId++, name, level, note, done: false, totalHours, doneHours: 0, deadline });
+
+  // 将临时 Plan 子任务一并写入（planSubtasks = 阶段目标，与日程任务的 subtasks 区分）
+  const planSubtasks = newPlanSubtasks.slice(); // 浅拷贝
+  mainTasks.push({ id: nextId++, name, level, note, done: false, totalHours, doneHours: 0, deadline, planSubtasks });
+
+  // 清空表单
   document.getElementById('newTaskName').value       = '';
   document.getElementById('newTaskNote').value       = '';
   document.getElementById('newTaskTotalHours').value = '';
   document.getElementById('newTaskDeadline').value   = '';
+  // 清空临时子任务
+  newPlanSubtasks = [];
+  renderNewPlanSubList();
+
   renderMainTasks(); saveData();
 }
 
@@ -1630,6 +1893,14 @@ function openEditPlan(id) {
   document.getElementById('editPlanLevel').value      = t.level || 'yellow';
   document.getElementById('editPlanDeadline').value   = t.deadline || '';
   document.getElementById('editPlanNote').value       = t.note || '';
+
+  // 确保 planSubtasks 字段存在（兼容旧数据）
+  if (!Array.isArray(t.planSubtasks)) t.planSubtasks = [];
+  // 渲染阶段目标列表
+  renderEditPlanSubList();
+  // 清空输入框
+  const inp = document.getElementById('editPlanSubInput');
+  if (inp) inp.value = '';
 
   document.getElementById('editPlanOverlay').classList.add('show');
   setTimeout(() => document.getElementById('editPlanName').focus(), 80);
@@ -3220,6 +3491,12 @@ function renderDvPool() {
     // 获取绑定 Plan 名称
     const mt = p.mainTaskId ? mainTasks.find(m => m.id === p.mainTaskId) : null;
     const planHtml = mt ? `<div class="dv-pool-item-plan">🎯 ${escHtml(mt.name)}</div>` : '';
+    // 子任务摘要（执行步骤数）
+    const subs = Array.isArray(p.subtasks) ? p.subtasks : [];
+    const subsDone = subs.filter(s => s.done).length;
+    const subsBadge = subs.length > 0
+      ? `<div style="font-size:10px;color:#888;margin-top:2px;">✓ ${subsDone}/${subs.length}</div>`
+      : '';
     return `<div class="dv-pool-item ${levelClass}" data-pool-id="${p.id}"
       draggable="true"
       ondragstart="onPoolItemDragStart(event, ${p.id})"
@@ -3227,6 +3504,7 @@ function renderDvPool() {
       <div style="flex:1;min-width:0;">
         <div style="font-size:11px;color:#333;line-height:1.4;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">${escHtml(p.name)}</div>
         ${planHtml}
+        ${subsBadge}
       </div>
       <span class="dv-pool-item-del" onclick="deleteDvPoolTask(${p.id})" title="删除">×</span>
     </div>`;
@@ -3261,12 +3539,17 @@ function addDvPoolTask() {
   const planSel = document.getElementById('dvPoolNewPlan');
   const mainTaskId = planSel && planSel.value ? parseInt(planSel.value) : null;
 
-  // 添加到 taskPool
-  taskPool.push({ id: nextId++, name, level, note: '', mainTaskId });
+  // 把临时步骤一并写入（subtasks = 执行步骤，与 Plan 的 planSubtasks 区分）
+  const subtasks = poolFormSubtasks.slice(); // 浅拷贝
 
-  // 清空输入框
+  // 添加到 taskPool
+  taskPool.push({ id: nextId++, name, level, note: '', mainTaskId, subtasks });
+
+  // 清空输入框和临时子任务
   nameEl.value = '';
   if (planSel) planSel.value = '';
+  poolFormSubtasks = [];
+  renderPoolFormSubList();
 
   renderDvPool();
   saveData();
@@ -3460,14 +3743,18 @@ function confirmPoolSchedule() {
   const levelSel = document.getElementById('poolScheduleLevel');
   const level = levelSel ? levelSel.value : (item.level || 'yellow');
 
-  // 读取子任务（新增），转为 {id, name, done} 格式，与主流程一致
+  // 合并子任务：
+  //   1. 保留任务池中原有的执行步骤（item.subtasks）
+  //   2. 追加在弹窗中新填写的 psSubtasks（文本列表 → 对象格式）
+  const existingSubs = Array.isArray(item.subtasks) ? item.subtasks : [];
   let subtaskIdCtr = nextId;
-  const subtasksArr = psSubtasks.map(name => ({
+  const newSubs = psSubtasks.map(name => ({
     id: subtaskIdCtr++,
     name,
     done: false
   }));
   nextId = subtaskIdCtr;
+  const subtasksArr = [...existingSubs, ...newSubs]; // 合并，保留原有步骤
 
   const [y, m, d] = dateStr.split('-').map(Number);
   calTasks.push({
@@ -3542,6 +3829,8 @@ function loadData() {
     if (d.mainTasks) {
       mainTasks = d.mainTasks.map(m => {
         if (!m.deadline) m.deadline = null;
+        // 兼容旧数据：Plan 阶段目标字段
+        if (!Array.isArray(m.planSubtasks)) m.planSubtasks = [];
         return m;
       });
     }
@@ -3555,7 +3844,13 @@ function loadData() {
         return t;
       });
     }
-    if (Array.isArray(d.taskPool)) taskPool = d.taskPool;
+    if (Array.isArray(d.taskPool)) {
+      // 兼容旧数据：任务池执行步骤字段
+      taskPool = d.taskPool.map(p => {
+        if (!Array.isArray(p.subtasks)) p.subtasks = [];
+        return p;
+      });
+    }
     if (d.nextId)       nextId       = d.nextId;
     if (d.currentYear)  currentYear  = d.currentYear;
     if (d.currentMonth) currentMonth = d.currentMonth;
