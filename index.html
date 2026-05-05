@@ -177,6 +177,16 @@
   .trash-icon { font-size: 18px; line-height: 1; }
   .trash-label { font-size: 12px; }
 
+  /* ===== 通用拖拽排序样式（子任务 & 阶段目标共用） ===== */
+  .sortable-item { cursor: grab; }
+  .sortable-item:active { cursor: grabbing; }
+  .sortable-item.drag-over { outline: 2px dashed #667eea; outline-offset: -2px; }
+  .sortable-item .drag-handle {
+    color: #ccc; font-size: 12px; cursor: grab; padding: 0 3px; flex-shrink: 0;
+    user-select: none; line-height: 1;
+  }
+  .sortable-item .drag-handle:hover { color: #999; }
+
   /* ===== Plan 子任务（目标拆解）样式 ===== */
   /* 创建/编辑弹窗中的子任务区域 */
   .plan-sub-section { margin-top: 10px; }
@@ -192,10 +202,11 @@
     border: none; border-radius: 7px; cursor: pointer; font-size: 14px; font-weight: 700;
   }
   .plan-sub-add-btn:hover { background: #5469d4; }
-  .plan-sub-list { display: flex; flex-direction: column; gap: 3px; max-height: 130px; overflow-y: auto; }
+  .plan-sub-list { display: flex; flex-direction: column; gap: 3px; max-height: 160px; overflow-y: auto; }
   .plan-sub-item {
     display: flex; align-items: center; gap: 7px;
     padding: 4px 8px; background: #f8f8f8; border-radius: 6px; font-size: 12px;
+    cursor: grab;
   }
   .plan-sub-check {
     width: 14px; height: 14px; border: 1.5px solid #ccc; border-radius: 3px;
@@ -246,14 +257,69 @@
     padding: 4px 8px; background: #667eea; color: white;
     border: none; border-radius: 5px; cursor: pointer; font-size: 12px; font-weight: 700;
   }
-  .pool-form-sub-list { display: flex; flex-direction: column; gap: 2px; max-height: 80px; overflow-y: auto; }
+  .pool-form-sub-list { display: flex; flex-direction: column; gap: 2px; max-height: 100px; overflow-y: auto; }
   .pool-form-sub-item {
     display: flex; align-items: center; gap: 5px;
     padding: 3px 6px; background: #f5f5f5; border-radius: 4px; font-size: 11px; color: #444;
+    cursor: grab;
   }
   .pool-form-sub-name { flex: 1; }
   .pool-form-sub-del { color: #ccc; cursor: pointer; font-size: 12px; }
   .pool-form-sub-del:hover { color: #ff4d4f; }
+
+  /* ===== 日视图底部"复制当天任务"按钮 ===== */
+  .dv-copy-day-btn {
+    padding: 7px 13px; background: rgba(102,126,234,0.08); color: #667eea;
+    border: 1px solid rgba(102,126,234,0.3); border-radius: 8px;
+    cursor: pointer; font-size: 12px; font-weight: 600; transition: all 0.18s;
+    flex-shrink: 0;
+  }
+  .dv-copy-day-btn:hover { background: rgba(102,126,234,0.15); border-color: #667eea; }
+
+  /* ===== 复制当天任务弹窗 ===== */
+  .copy-day-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.45);
+    display: none; align-items: center; justify-content: center; z-index: 3000;
+  }
+  .copy-day-overlay.show { display: flex; }
+  .copy-day-modal {
+    background: white; border-radius: 16px; width: 360px;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.2); overflow: hidden;
+    animation: slideUp 0.2s ease;
+  }
+  .copy-day-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 20px; background: linear-gradient(135deg,#667eea,#764ba2);
+    color: white;
+  }
+  .copy-day-title { font-size: 15px; font-weight: 700; }
+  .copy-day-close {
+    background: none; border: none; color: rgba(255,255,255,0.8);
+    font-size: 20px; cursor: pointer; line-height: 1; padding: 0 4px;
+  }
+  .copy-day-close:hover { color: white; }
+  .copy-day-body { padding: 18px 20px; }
+  .copy-day-info {
+    background: #f8f9fe; border-radius: 10px; padding: 10px 14px;
+    max-height: 160px; overflow-y: auto;
+  }
+  .copy-day-info-title { font-size: 12px; color: #888; margin-bottom: 6px; }
+  .copy-day-task-row {
+    display: flex; align-items: center; gap: 8px;
+    padding: 4px 0; font-size: 12px; color: #444;
+    border-bottom: 1px solid #f0f0f0;
+  }
+  .copy-day-task-row:last-child { border-bottom: none; }
+  .copy-day-task-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .copy-day-date-input {
+    width: 100%; padding: 9px 12px; border: 1.5px solid #e8e8e8;
+    border-radius: 8px; font-size: 13px; outline: none; font-family: inherit;
+  }
+  .copy-day-date-input:focus { border-color: #667eea; }
+  .copy-day-footer {
+    display: flex; gap: 10px; padding: 14px 20px;
+    border-top: 1px solid #f0f0f0; justify-content: flex-end;
+  }
 
   .export-area {
     padding: 8px 14px 12px;
@@ -527,7 +593,7 @@
   /* 日视图底部 */
   .dayview-footer {
     padding: 12px 20px; border-top: 1px solid #eee; flex-shrink: 0;
-    display: flex; gap: 10px;
+    display: flex; gap: 10px; align-items: center;
   }
   .dv-add-btn {
     flex: 1; background: linear-gradient(135deg, #667eea, #764ba2);
@@ -536,7 +602,7 @@
   }
   .dv-add-btn:hover { opacity: 0.88; }
   .dv-stat {
-    display: flex; align-items: center; font-size: 12px; color: #888;
+    flex: 1; display: flex; align-items: center; font-size: 12px; color: #888;
     background: #f5f5f5; padding: 0 12px; border-radius: 10px;
   }
 
@@ -570,7 +636,7 @@
   .subtask-item {
     display: flex; align-items: center; gap: 8px;
     padding: 7px 10px; border-radius: 8px; background: #f7f8fa;
-    cursor: pointer; transition: background 0.15s;
+    cursor: grab; transition: background 0.15s;
   }
   .subtask-item:hover { background: #eeeef8; }
   .subtask-check {
@@ -1167,7 +1233,7 @@
           <!-- 任务池子任务（执行步骤，可选） -->
           <div class="pool-form-sub-section" id="poolFormSubSection">
             <div class="pool-form-sub-add-row">
-              <input type="text" id="poolFormSubInput" class="pool-form-sub-input" placeholder="步骤（可选）"
+              <input type="text" id="poolFormSubInput" class="pool-form-sub-input" placeholder="子任务（可选）"
                 onkeydown="if(event.key==='Enter'){event.preventDefault();addPoolFormSub();}" />
               <button class="pool-form-sub-add-btn" onclick="addPoolFormSub()">+</button>
             </div>
@@ -1188,7 +1254,31 @@
     </div>
     <div class="dayview-footer">
       <div class="dv-stat" id="dayviewStat"></div>
+      <button class="dv-copy-day-btn" onclick="openCopyDayModal()" title="复制当天全部任务到其他日期">📋 复制到其他日期</button>
       <button class="dv-add-btn" id="dayviewAddBtn" onclick="openDayViewAdd()">+ 添加日程</button>
+    </div>
+  </div>
+</div>
+
+<!-- 复制当天任务弹窗 -->
+<div class="copy-day-overlay" id="copyDayOverlay">
+  <div class="copy-day-modal">
+    <div class="copy-day-header">
+      <span class="copy-day-title">📋 复制当天任务</span>
+      <button class="copy-day-close" onclick="closeCopyDayModal()">×</button>
+    </div>
+    <div class="copy-day-body">
+      <div class="copy-day-info" id="copyDayInfo">
+        <!-- 当天任务预览 -->
+      </div>
+      <div style="margin-top:14px;">
+        <label style="font-size:13px;color:#555;display:block;margin-bottom:6px;">选择目标日期</label>
+        <input type="date" id="copyDayTarget" class="copy-day-date-input" />
+      </div>
+    </div>
+    <div class="copy-day-footer">
+      <button class="btn-cancel" onclick="closeCopyDayModal()">取消</button>
+      <button class="btn-confirm" onclick="confirmCopyDay()">✓ 确认复制</button>
     </div>
   </div>
 </div>
@@ -1712,23 +1802,91 @@ function renderStats() {
   bar.innerHTML = html;
 }
 
+// ==================== 通用拖拽排序引擎 ====================
+/**
+ * makeSortable(listEl, getArray, setArray, onSave)
+ *
+ * 给一个列表容器开启拖拽排序，所有子任务列表（Plan 阶段目标、任务池子任务、详情子任务）共用一套逻辑。
+ *
+ * @param {HTMLElement} listEl   - 列表容器（已渲染好）
+ * @param {Function}    getArray - 返回当前数据数组的函数
+ * @param {Function}    setArray - 将排序后的新数组写回数据源
+ * @param {Function}    onSave   - 排序完成后的回调（通常是 saveData + rerender）
+ */
+function makeSortable(listEl, getArray, setArray, onSave) {
+  if (!listEl) return;
+  let dragSrcIdx = null; // 被拖拽项的原始索引
+
+  listEl.querySelectorAll('[data-sort-idx]').forEach(item => {
+    item.setAttribute('draggable', 'true');
+
+    item.addEventListener('dragstart', e => {
+      dragSrcIdx = parseInt(item.dataset.sortIdx);
+      e.dataTransfer.effectAllowed = 'move';
+      // 轻微延迟让浏览器截图
+      setTimeout(() => item.classList.add('dragging'), 10);
+    });
+
+    item.addEventListener('dragend', () => {
+      item.classList.remove('dragging');
+      listEl.querySelectorAll('[data-sort-idx]').forEach(el => el.classList.remove('drag-over'));
+      dragSrcIdx = null;
+    });
+
+    item.addEventListener('dragover', e => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      listEl.querySelectorAll('[data-sort-idx]').forEach(el => el.classList.remove('drag-over'));
+      item.classList.add('drag-over');
+    });
+
+    item.addEventListener('dragleave', () => {
+      item.classList.remove('drag-over');
+    });
+
+    item.addEventListener('drop', e => {
+      e.preventDefault();
+      e.stopPropagation();
+      item.classList.remove('drag-over');
+
+      const dropIdx = parseInt(item.dataset.sortIdx);
+      if (dragSrcIdx === null || dragSrcIdx === dropIdx) return;
+
+      // 重排数组：把 dragSrcIdx 移到 dropIdx 位置
+      const arr = getArray();
+      const moved = arr.splice(dragSrcIdx, 1)[0];
+      arr.splice(dropIdx, 0, moved);
+      setArray(arr);
+      onSave();
+    });
+  });
+}
+
 // ==================== Plan 子任务（目标拆解）管理 ====================
 // 创建 Plan 时临时存储的子任务列表（每次打开表单时重置）
 let newPlanSubtasks = [];
 
 /**
- * 渲染"创建 Plan 表单"中的阶段目标列表
+ * 渲染"创建 Plan 表单"中的阶段目标列表，并启用拖拽排序
  */
 function renderNewPlanSubList() {
   const el = document.getElementById('newPlanSubList');
   if (!el) return;
   if (!newPlanSubtasks.length) { el.innerHTML = ''; return; }
   el.innerHTML = newPlanSubtasks.map((s, i) => `
-    <div class="plan-sub-item ${s.done ? 'done' : ''}">
+    <div class="plan-sub-item ${s.done ? 'done' : ''}" data-sort-idx="${i}">
+      <span class="drag-handle">⠿</span>
       <div class="plan-sub-check" onclick="toggleNewPlanSub(${i})"></div>
       <span class="plan-sub-name">${escHtml(s.name)}</span>
       <span class="plan-sub-del" onclick="removeNewPlanSub(${i})">×</span>
     </div>`).join('');
+  // 开启拖拽排序
+  makeSortable(
+    el,
+    () => newPlanSubtasks,
+    arr => { newPlanSubtasks = arr; },
+    renderNewPlanSubList
+  );
 }
 
 /** 添加一条阶段目标（创建表单） */
@@ -1757,7 +1915,7 @@ function removeNewPlanSub(idx) {
 // -------- 编辑 Plan 弹窗中的阶段目标 --------
 
 /**
- * 渲染"编辑 Plan 弹窗"中的阶段目标列表
+ * 渲染"编辑 Plan 弹窗"中的阶段目标列表，并启用拖拽排序
  * t = 当前 Plan 对象（直接引用，实时操作）
  */
 function renderEditPlanSubList() {
@@ -1767,11 +1925,19 @@ function renderEditPlanSubList() {
   const subs = Array.isArray(t.planSubtasks) ? t.planSubtasks : [];
   if (!subs.length) { el.innerHTML = '<div style="font-size:11px;color:#bbb;padding:2px 0;">暂无阶段目标</div>'; return; }
   el.innerHTML = subs.map((s, i) => `
-    <div class="plan-sub-item ${s.done ? 'done' : ''}">
+    <div class="plan-sub-item ${s.done ? 'done' : ''}" data-sort-idx="${i}">
+      <span class="drag-handle">⠿</span>
       <div class="plan-sub-check" onclick="toggleEditPlanSub(${i})"></div>
       <span class="plan-sub-name">${escHtml(s.name)}</span>
       <span class="plan-sub-del" onclick="removeEditPlanSub(${i})">×</span>
     </div>`).join('');
+  // 开启拖拽排序：排序后直接修改 t.planSubtasks 并存储
+  makeSortable(
+    el,
+    () => t.planSubtasks,
+    arr => { t.planSubtasks = arr; },
+    () => { renderEditPlanSubList(); renderMainTasks(); saveData(); }
+  );
 }
 
 /** 添加一条阶段目标（编辑弹窗） */
@@ -1814,20 +1980,28 @@ function removeEditPlanSub(idx) {
 let poolFormSubtasks = [];
 
 /**
- * 渲染任务池添加表单中的子任务列表
+ * 渲染任务池添加表单中的子任务列表，并启用拖拽排序
  */
 function renderPoolFormSubList() {
   const el = document.getElementById('poolFormSubList');
   if (!el) return;
   if (!poolFormSubtasks.length) { el.innerHTML = ''; return; }
   el.innerHTML = poolFormSubtasks.map((s, i) => `
-    <div class="pool-form-sub-item">
+    <div class="pool-form-sub-item" data-sort-idx="${i}">
+      <span class="drag-handle" style="color:#ccc;">⠿</span>
       <span class="pool-form-sub-name">${escHtml(s.name)}</span>
       <span class="pool-form-sub-del" onclick="removePoolFormSub(${i})">×</span>
     </div>`).join('');
+  // 开启拖拽排序
+  makeSortable(
+    el,
+    () => poolFormSubtasks,
+    arr => { poolFormSubtasks = arr; },
+    renderPoolFormSubList
+  );
 }
 
-/** 添加一条步骤（任务池表单） */
+/** 添加一条子任务（任务池表单） */
 function addPoolFormSub() {
   const inp = document.getElementById('poolFormSubInput');
   const text = inp ? inp.value.trim() : '';
@@ -2223,6 +2397,125 @@ function closeDayView() {
   currentDayViewDate = null;
 }
 
+// ==================== 复制当天任务 ====================
+/**
+ * 打开"复制当天任务"弹窗
+ * 展示当天任务列表预览，并提供目标日期选择
+ */
+function openCopyDayModal() {
+  if (!currentDayViewDate) return;
+  const [y, m, d] = currentDayViewDate.split('-').map(Number);
+  const dayTasks = calTasks.filter(t => t.year === y && t.month === m && t.day === d);
+
+  const infoEl = document.getElementById('copyDayInfo');
+  if (dayTasks.length === 0) {
+    infoEl.innerHTML = '<div style="font-size:12px;color:#bbb;text-align:center;padding:8px 0;">当天没有任何任务</div>';
+  } else {
+    const dotColors = { red: '#ff4d4f', yellow: '#faad14', green: '#52c41a', blue: '#1890ff', purple: '#722ed1' };
+    infoEl.innerHTML = `
+      <div class="copy-day-info-title">当天 ${dayTasks.length} 个任务将被复制：</div>
+      ${dayTasks.map(t => {
+        const h = t.startHour != null ? t.startHour : 0;
+        const hh = String(Math.floor(h)).padStart(2,'0');
+        const mm = h % 1 === 0.5 ? '30' : '00';
+        const color = dotColors[t.level] || dotColors.yellow;
+        const durLabel = t.duration < 1 ? '30min' : `${t.duration}h`;
+        return `<div class="copy-day-task-row">
+          <span class="copy-day-task-dot" style="background:${color}"></span>
+          <span>${hh}:${mm}</span>
+          <span style="flex:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">${escHtml(t.name)}</span>
+          <span style="color:#aaa;">${durLabel}</span>
+        </div>`;
+      }).join('')}`;
+  }
+
+  // 目标日期输入框：默认为明天
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  const tStr = tomorrow.toISOString().slice(0, 10);
+  document.getElementById('copyDayTarget').value = tStr;
+
+  document.getElementById('copyDayOverlay').classList.add('show');
+}
+
+/** 关闭弹窗 */
+function closeCopyDayModal() {
+  document.getElementById('copyDayOverlay').classList.remove('show');
+}
+
+/**
+ * 确认复制：执行冲突检查 → 复制任务到目标日期
+ *
+ * 冲突检测：目标日期中若已有任务与待复制任务时间段重叠，则拦截并提示
+ * 时间段重叠条件：max(startA,startB) < min(endA,endB)
+ */
+function confirmCopyDay() {
+  if (!currentDayViewDate) return;
+
+  const targetDateStr = document.getElementById('copyDayTarget').value;
+  if (!targetDateStr) { alert('请选择目标日期'); return; }
+  if (targetDateStr === currentDayViewDate) { alert('目标日期与当前日期相同，请选择不同的日期'); return; }
+
+  const [sy, sm, sd] = currentDayViewDate.split('-').map(Number);
+  const [ty, tm, td] = targetDateStr.split('-').map(Number);
+
+  // 当天任务（来源）
+  const srcTasks = calTasks.filter(t => t.year === sy && t.month === sm && t.day === sd);
+  if (srcTasks.length === 0) { alert('当天没有任务可复制'); closeCopyDayModal(); return; }
+
+  // 目标日期已有任务
+  const dstTasks = calTasks.filter(t => t.year === ty && t.month === tm && t.day === td);
+
+  // 冲突检测
+  const conflicts = [];
+  for (const src of srcTasks) {
+    const srcStart = src.startHour != null ? src.startHour : 0;
+    const srcEnd   = srcStart + (parseFloat(src.duration) || 1);
+    for (const dst of dstTasks) {
+      const dstStart = dst.startHour != null ? dst.startHour : 0;
+      const dstEnd   = dstStart + (parseFloat(dst.duration) || 1);
+      // 重叠判断
+      if (Math.max(srcStart, dstStart) < Math.min(srcEnd, dstEnd)) {
+        conflicts.push(`"${src.name}" (${_fmtHour(srcStart)}-${_fmtHour(srcEnd)}) 与已有 "${dst.name}" (${_fmtHour(dstStart)}-${_fmtHour(dstEnd)}) 冲突`);
+        break;
+      }
+    }
+  }
+
+  if (conflicts.length > 0) {
+    alert(`目标日期中存在时间冲突，请调整后再复制：\n\n${conflicts.join('\n')}`);
+    return;
+  }
+
+  // 复制任务（深拷贝，重置完成状态，生成新 id）
+  const newTasks = srcTasks.map(src => ({
+    ...src,
+    id:   nextId++,                        // 新 id，避免与原任务冲突
+    year:  ty,
+    month: tm,
+    day:   td,
+    done:  false,                          // 复制的任务默认未完成
+    // 子任务也深拷贝，并重新生成 id，避免 id 重复
+    subtasks: Array.isArray(src.subtasks)
+      ? src.subtasks.map(s => ({ ...s, id: nextId++, done: false }))
+      : []
+  }));
+
+  calTasks.push(...newTasks);
+  saveData();
+  render();
+
+  closeCopyDayModal();
+  alert(`✓ 已成功复制 ${newTasks.length} 个任务到 ${ty}年${tm}月${td}日`);
+}
+
+/** 内部工具：把小时数格式化为 HH:MM */
+function _fmtHour(h) {
+  const hh = String(Math.floor(h)).padStart(2, '0');
+  const mm = h % 1 === 0.5 ? '30' : '00';
+  return `${hh}:${mm}`;
+}
+
 function openDayViewAdd(presetHour) {
   const date = currentDayViewDate;
   // 如果弹窗还没打开，先关闭日视图再打开（避免遮挡）
@@ -2264,6 +2557,11 @@ function onTimelineColClick(e) {
 
 document.getElementById('dayviewOverlay').addEventListener('click', e => {
   if (e.target === document.getElementById('dayviewOverlay')) closeDayView();
+});
+
+// 点击遮罩关闭复制弹窗
+document.getElementById('copyDayOverlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('copyDayOverlay')) closeCopyDayModal();
 });
 
 // ==================== 日视图内拖拽 ====================
@@ -2696,13 +2994,22 @@ function renderSubtaskList(t) {
   }
 
   document.getElementById('tdSubCount').textContent = `${doneCount} / ${subs.length}`;
-  listEl.innerHTML = subs.map(s => `
-    <div class="subtask-item ${s.done ? 'done' : ''}" onclick="toggleSubtask(${s.id})">
-      <div class="subtask-check"></div>
-      <span class="subtask-text">${escHtml(s.name)}</span>
+  listEl.innerHTML = subs.map((s, i) => `
+    <div class="subtask-item ${s.done ? 'done' : ''}" data-sort-idx="${i}" data-sub-id="${s.id}">
+      <span class="drag-handle" style="color:#ccc;font-size:14px;" onclick="event.stopPropagation()">⠿</span>
+      <div class="subtask-check" onclick="event.stopPropagation();toggleSubtask(${s.id})"></div>
+      <span class="subtask-text" onclick="event.stopPropagation();toggleSubtask(${s.id})">${escHtml(s.name)}</span>
       <span class="subtask-del" onclick="event.stopPropagation();delSubtask(${s.id})">×</span>
     </div>
   `).join('');
+
+  // 开启拖拽排序：排序后重新写回 t.subtasks 并保存
+  makeSortable(
+    listEl,
+    () => t.subtasks,
+    arr => { t.subtasks = arr; },
+    () => { renderSubtaskList(t); saveData(); refreshDayViewIfOpen(); renderCalendar(); }
+  );
 }
 
 function addSubtask() {
