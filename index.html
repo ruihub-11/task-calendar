@@ -1,9 +1,10 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Light Planner</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
@@ -1048,160 +1049,1179 @@
     from { opacity: 1; }
     to   { opacity: 0; }
   }
+
+/* ========== REDESIGN LAYER (from claude-redesign-part1) ========== */
+/* ===== CSS VARIABLES ===== */
+:root {
+  --bg:           #f4f5fb;
+  --surface:      #ffffff;
+  --surface-2:    #f8f9fe;
+  --border:       #e8eaf2;
+  --border-light: #f0f2f8;
+  --text:         #1a1d2e;
+  --text-2:       #6b7280;
+  --text-3:       #9ca3af;
+  --accent:       #5b5fc7;
+  --accent-light: #eeeeff;
+  --accent-mid:   #d4d1ff;
+  --red:          #ef4444;
+  --red-light:    #fef2f2;
+  --red-mid:      #fecaca;
+  --amber:        #f59e0b;
+  --amber-light:  #fffbeb;
+  --green:        #22c55e;
+  --green-light:  #f0fdf4;
+  --shadow-sm:    0 1px 3px rgba(0,0,0,.06);
+  --shadow:       0 4px 16px rgba(0,0,0,.08);
+  --shadow-lg:    0 10px 40px rgba(0,0,0,.12);
+  --shadow-xl:    0 24px 64px rgba(0,0,0,.14);
+  --radius:       10px;
+  --radius-sm:    7px;
+  --radius-xs:    5px;
+}
+
+/* ===== RESET ===== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; overflow: hidden; }
+body {
+  font-family: 'Inter', -apple-system, 'PingFang SC', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 13px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ===== APP SHELL ===== */
+.app { display: flex; height: 100vh; overflow: hidden; flex-direction: column; }
+
+/* ===== TOP STATS BAR ===== */
+.top-header {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  height: 56px;
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  gap: 0;
+  flex-shrink: 0;
+  z-index: 100;
+}
+.brand {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 150px;
+  padding-right: 16px;
+  border-right: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.brand-name {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.brand-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--amber);
+  flex-shrink: 0;
+}
+.brand-sub { font-size: 10px; color: var(--text-3); margin-top: 1px; }
+
+.header-stats {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  overflow: hidden;
+}
+.hstat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0 13px;
+  border-right: 1px solid var(--border);
+  flex-shrink: 0;
+  min-width: 68px;
+}
+.hstat-label {
+  font-size: 10px;
+  color: var(--text-3);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: .4px;
+  white-space: nowrap;
+  margin-bottom: 2px;
+}
+.hstat-value {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  line-height: 1.1;
+}
+.hstat-value.green { color: var(--green); }
+.hstat-value.red   { color: var(--red);   }
+.hstat-value.amber { color: var(--amber); }
+.hstat-arr { font-size: 10px; color: var(--text-3); font-weight: 400; }
+
+.hstat-priority {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 13px;
+  border-right: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.hstat-p-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+.hstat-p-dot { width: 7px; height: 7px; border-radius: 50%; }
+.hstat-p-label { font-size: 9px; color: var(--text-3); white-space: nowrap; font-weight: 500; }
+.hstat-p-value { font-size: 15px; font-weight: 700; color: var(--text); line-height: 1; }
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+  padding-left: 14px;
+  flex-shrink: 0;
+}
+.header-icon-btn {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  color: var(--text-2);
+  font-size: 14px;
+  transition: all .15s;
+}
+.header-icon-btn:hover { background: var(--accent-light); border-color: var(--accent-mid); color: var(--accent); }
+.avatar {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent), #a78bfa);
+  display: flex; align-items: center; justify-content: center;
+  color: white; font-size: 11px; font-weight: 700; flex-shrink: 0;
+}
+.header-user { display: flex; align-items: center; gap: 6px; cursor: pointer; }
+.header-user-name { font-size: 13px; font-weight: 500; color: var(--text); white-space: nowrap; }
+
+/* ===== MAIN BODY ===== */
+.app-body {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  min-height: 0;
+}
+
+/* ===== LEFT PANEL — TASK POOL ===== */
+.left-panel {
+  width: 290px;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+/* Quick Add */
+.left-panel-header {
+  padding: 13px 16px 11px;
+  border-bottom: 1px solid var(--border-light);
+  flex-shrink: 0;
+}
+.quick-add-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: .6px;
+  margin-bottom: 7px;
+}
+.quick-add-wrap {
+  display: flex;
+  align-items: center;
+  background: var(--bg);
+  border: 1.5px solid var(--border);
+  border-radius: 9px;
+  padding: 7px 10px;
+  gap: 7px;
+  transition: border-color .15s;
+}
+.quick-add-wrap:focus-within { border-color: var(--accent); background: #fff; }
+.quick-add-input {
+  flex: 1;
+  border: none;
+  background: none;
+  outline: none;
+  font-size: 13px;
+  color: var(--text);
+  font-family: 'Inter', sans-serif;
+}
+.quick-add-input::placeholder { color: var(--text-3); }
+.quick-add-kbd {
+  font-size: 10px;
+  color: var(--text-3);
+  background: var(--border);
+  border-radius: 4px;
+  padding: 1px 5px;
+  font-weight: 600;
+  flex-shrink: 0;
+  font-family: monospace;
+}
+
+/* Pool section */
+.pool-section { flex: 1; overflow: hidden; display: flex; flex-direction: column; }
+.pool-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px 7px;
+  flex-shrink: 0;
+}
+.pool-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.pool-count-label { font-size: 11px; color: var(--text-3); font-weight: 400; }
+.pool-add-btn {
+  padding: 4px 11px;
+  background: var(--accent-light);
+  color: var(--accent);
+  border: none;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  transition: all .15s;
+  white-space: nowrap;
+}
+.pool-add-btn:hover { background: var(--accent); color: white; }
+
+/* Filter tabs */
+.pool-filter-tabs { display: flex; gap: 3px; padding: 0 16px 8px; flex-shrink: 0; }
+.pool-filter-tab {
+  padding: 3px 9px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1.5px solid transparent;
+  background: none;
+  color: var(--text-3);
+  font-family: 'Inter', sans-serif;
+  transition: all .15s;
+  white-space: nowrap;
+}
+.pool-filter-tab:hover:not(.active) { background: var(--bg); color: var(--text-2); }
+.pool-filter-tab.active { background: var(--accent); color: white; border-color: var(--accent); }
+.pool-tab-count { font-size: 10px; opacity: .8; }
+
+/* Pool list */
+.pool-list { flex: 1; overflow-y: auto; padding: 2px 10px 6px; }
+.pool-list::-webkit-scrollbar { width: 3px; }
+.pool-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+.pool-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 9px;
+  margin-bottom: 3px;
+  cursor: grab;
+  transition: all .15s;
+  border: 1.5px solid transparent;
+  background: var(--surface);
+}
+.pool-item:hover {
+  background: var(--bg);
+  border-color: var(--border);
+  transform: translateX(2px);
+}
+.pool-item:hover .pool-item-del { opacity: 1; }
+.pool-item.dragging { opacity: .3; cursor: grabbing; }
+.pool-item-check {
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  border: 1.5px solid var(--border);
+  flex-shrink: 0;
+  cursor: pointer;
+  transition: all .15s;
+}
+.pool-item-check:hover { border-color: var(--green); }
+.pool-item-body { flex: 1; min-width: 0; }
+.pool-item-name {
+  font-size: 12px;
+  color: var(--text);
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  line-height: 1.4;
+}
+.pool-item-goal { font-size: 10px; color: var(--text-3); margin-top: 1px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.pool-item-badge {
+  font-size: 10px;
+  padding: 2px 7px;
+  border-radius: 20px;
+  font-weight: 500;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+.badge-important { background: var(--red-light);   color: var(--red);   }
+.badge-normal    { background: var(--accent-light); color: var(--accent);}
+.badge-easy      { background: var(--green-light);  color: #15803d;      }
+.pool-item-del {
+  color: var(--text-3);
+  cursor: pointer;
+  font-size: 14px;
+  opacity: 0;
+  transition: opacity .15s;
+  flex-shrink: 0;
+  line-height: 1;
+}
+.pool-item-del:hover { color: var(--red); }
+
+/* Motivation card */
+.moti-card {
+  margin: 4px 10px 10px;
+  background: linear-gradient(135deg, #eef0fb 0%, #f0ecff 100%);
+  border-radius: 12px;
+  padding: 13px 14px;
+  flex-shrink: 0;
+  position: relative;
+  overflow: hidden;
+}
+.moti-card::after {
+  content: '🐱';
+  position: absolute;
+  right: 10px; bottom: 6px;
+  font-size: 28px;
+  opacity: .65;
+  pointer-events: none;
+}
+.moti-card-title { font-size: 12px; font-weight: 700; color: #5b21b6; margin-bottom: 3px; }
+.moti-card-text  { font-size: 11px; color: #6d28d9; line-height: 1.55; max-width: 75%; }
+.moti-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 9px;
+}
+.moti-streak {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  color: #5b21b6;
+  font-weight: 600;
+  background: rgba(109,40,217,.12);
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+.moti-link {
+  font-size: 10px;
+  color: #7c3aed;
+  cursor: pointer;
+  font-weight: 500;
+  background: rgba(124,58,237,.1);
+  padding: 2px 8px;
+  border-radius: 10px;
+  transition: background .15s;
+}
+.moti-link:hover { background: rgba(124,58,237,.2); }
+
+/* ===== CENTER — CALENDAR ===== */
+.main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
+
+.cal-header {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 10px 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.cal-title { font-size: 19px; font-weight: 700; color: var(--text); letter-spacing: -.3px; min-width: 150px; }
+
+.cal-nav-btn {
+  width: 28px; height: 28px;
+  border-radius: 7px;
+  border: 1.5px solid var(--border);
+  background: var(--surface);
+  color: var(--text-2);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 600;
+  transition: all .15s;
+  flex-shrink: 0;
+  line-height: 1;
+}
+.cal-nav-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
+
+.cal-today-btn {
+  padding: 5px 13px;
+  border-radius: 20px;
+  background: var(--accent-light);
+  border: 1.5px solid var(--accent);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--accent);
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  transition: all .15s;
+  flex-shrink: 0;
+}
+.cal-today-btn:hover { background: var(--accent); color: white; }
+
+.cal-view-toggle {
+  display: flex;
+  gap: 2px;
+  margin-left: auto;
+  background: var(--bg);
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  padding: 3px;
+}
+.cal-view-btn {
+  padding: 3px 11px;
+  border-radius: 5px;
+  border: none;
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  color: var(--text-3);
+  background: none;
+  transition: all .15s;
+}
+.cal-view-btn.active {
+  background: var(--surface);
+  color: var(--accent);
+  font-weight: 600;
+  box-shadow: 0 1px 3px rgba(0,0,0,.07);
+}
+
+.cal-grid-wrap { flex: 1; overflow: hidden; display: flex; flex-direction: column; }
+
+.cal-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 0 6px;
+  flex-shrink: 0;
+}
+.cal-weekday {
+  text-align: center;
+  padding: 7px 4px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: .5px;
+}
+.cal-weekday.weekend { color: var(--red); opacity: .85; }
+
+.cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  grid-auto-rows: minmax(106px, auto);
+  flex: 1;
+  overflow-y: auto;
+  padding: 6px;
+  gap: 5px;
+}
+.cal-grid::-webkit-scrollbar { width: 4px; }
+.cal-grid::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+/* Day cells */
+.day-cell {
+  background: var(--surface);
+  border: 1.5px solid var(--border-light);
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  transition: border-color .15s, box-shadow .15s;
+  position: relative;
+  overflow: hidden;
+}
+.day-cell:hover { border-color: var(--accent); box-shadow: 0 2px 10px rgba(91,95,199,.10); }
+.day-cell.empty { background: transparent; border-color: transparent; box-shadow: none; cursor: default; pointer-events: none; }
+.day-cell.drag-over-cell { background: var(--accent-light); border-color: var(--accent); border-style: dashed; }
+.day-cell.day-all-done-cell { background: linear-gradient(135deg, #f0fdf8, #e8fdf2); border-color: #a7f3cc; }
+.day-cell.weekend-day { background: #fdfcfc; }
+.day-cell.today { border-color: var(--accent); border-width: 2px; }
+@keyframes cellPulse { 0%{background:rgba(91,95,199,.12)}100%{background:transparent} }
+.day-cell.drop-success { animation: cellPulse .5s ease; }
+
+.day-header {
+  display: flex;
+  align-items: center;
+  padding: 6px 7px 3px;
+  flex-shrink: 0;
+  gap: 2px;
+}
+.day-number {
+  width: 24px; height: 24px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-2);
+  border-radius: 50%;
+  flex-shrink: 0;
+  line-height: 1;
+}
+.day-cell.today .day-number { background: var(--accent); color: white; font-weight: 700; }
+.day-cell.weekend-day .day-number { color: var(--red); }
+.day-cell.today.weekend-day .day-number { background: var(--red); color: white; }
+
+.day-all-done-label {
+  font-size: 9px;
+  color: var(--green);
+  font-weight: 700;
+  flex: 1;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  animation: pulse 2.2s ease-in-out infinite;
+}
+@keyframes pulse { 0%,100%{opacity:1}50%{opacity:.5} }
+
+.day-add-btn {
+  width: 20px; height: 20px;
+  border-radius: 50%;
+  border: none;
+  background: var(--accent-light);
+  color: var(--accent);
+  font-size: 16px;
+  line-height: 1;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  opacity: 0;
+  transition: all .15s;
+  flex-shrink: 0;
+  margin-left: auto;
+}
+.day-cell:hover .day-add-btn { opacity: 1; }
+.day-add-btn:hover { background: var(--accent); color: white; transform: scale(1.1); }
+
+.day-summary { padding: 0 5px 5px; display: flex; flex-direction: column; gap: 2px; flex: 1; }
+
+/* Task chips */
+.day-summary-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  border-radius: 5px;
+  padding: 2px 6px;
+  font-size: 10px;
+  font-weight: 500;
+  color: white;
+  overflow: hidden;
+  white-space: nowrap;
+  cursor: grab;
+  user-select: none;
+  transition: opacity .12s, transform .12s, box-shadow .12s;
+  line-height: 1.55;
+}
+.day-summary-item:hover { opacity: .88; transform: translateX(1px); box-shadow: 0 2px 6px rgba(0,0,0,.13); }
+.day-summary-item.done { opacity: .38; }
+.day-summary-item.dragging { opacity: .15; cursor: grabbing; }
+
+/* Keep chip class names identical to JS references */
+.dv-bg-red    { background: linear-gradient(110deg,#ef4444,#f87171); }
+.dv-bg-yellow { background: linear-gradient(110deg,#f59e0b,#fbbf24); }
+.dv-bg-green  { background: linear-gradient(110deg,#22c55e,#4ade80); }
+
+.day-summary-empty { font-size: 10px; color: var(--text-3); padding: 1px 6px; }
+
+/* Trash zone */
+.trash-zone {
+  margin: 0 6px 5px;
+  border: 1.5px dashed var(--border);
+  border-radius: 8px;
+  padding: 5px 12px;
+  display: flex; align-items: center; justify-content: center;
+  gap: 6px;
+  color: var(--text-3);
+  font-size: 11px;
+  transition: all .18s;
+  flex-shrink: 0;
+}
+.trash-zone.drag-over { border-color: var(--red); background: var(--red-light); color: var(--red); }
+
+/* Bottom hint bar */
+.bottom-bar {
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  padding: 7px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--text-3);
+  flex-shrink: 0;
+}
+.bottom-bar-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--amber); flex-shrink: 0; }
+.bottom-bar-step { color: var(--text-2); font-weight: 500; }
+.bottom-bar-arr  { color: var(--accent); }
+
+/* ===== RIGHT PANEL — MY PLAN ===== */
+.right-panel {
+  width: 284px;
+  background: var(--surface);
+  border-left: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.right-panel-header {
+  padding: 13px 14px 10px;
+  border-bottom: 1px solid var(--border-light);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.right-panel-title-wrap { display: flex; flex-direction: column; gap: 1px; }
+.right-panel-title { font-size: 13px; font-weight: 700; color: var(--text); }
+.right-panel-sub   { font-size: 10px; color: var(--text-3); font-weight: 400; }
+.new-goal-btn {
+  padding: 5px 11px;
+  border-radius: 20px;
+  background: var(--accent-light);
+  color: var(--accent);
+  border: none;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  transition: all .15s;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.new-goal-btn:hover { background: var(--accent); color: white; }
+
+.goal-list { flex: 1; overflow-y: auto; padding: 10px 10px 6px; }
+.goal-list::-webkit-scrollbar { width: 3px; }
+.goal-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+.goal-empty { text-align: center; padding: 36px 16px; color: var(--text-3); font-size: 12px; line-height: 1.9; }
+.goal-empty-icon { font-size: 26px; margin-bottom: 8px; opacity: .45; }
+
+/* Goal card */
+.goal-card {
+  border: 1.5px solid var(--border-light);
+  border-left: 3px solid transparent;
+  border-radius: 10px;
+  padding: 11px;
+  margin-bottom: 7px;
+  background: var(--surface);
+  cursor: grab;
+  transition: border-color .15s, box-shadow .15s, transform .15s;
+}
+.goal-card:hover { border-color: var(--border); box-shadow: 0 2px 10px rgba(0,0,0,.07); transform: translateX(2px); }
+.goal-card.dragging { opacity: .3; cursor: grabbing; }
+.goal-card.done-card { opacity: .6; }
+.goal-card.done-card .goal-card-name { text-decoration: line-through; color: var(--text-3); }
+.goal-card.level-red    { border-left-color: var(--red);   }
+.goal-card.level-yellow { border-left-color: var(--amber); }
+.goal-card.level-green  { border-left-color: var(--green); }
+
+.goal-card-top { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 8px; }
+.goal-icon {
+  width: 28px; height: 28px;
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px;
+  flex-shrink: 0;
+}
+.goal-icon-red    { background: var(--red-light);   }
+.goal-icon-yellow { background: var(--amber-light); }
+.goal-icon-green  { background: var(--green-light); }
+
+.goal-card-info { flex: 1; min-width: 0; }
+.goal-card-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 3px;
+}
+.goal-card-meta { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
+.goal-status {
+  font-size: 10px;
+  padding: 1px 7px;
+  border-radius: 20px;
+  font-weight: 500;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.status-active  { background: var(--green-light); color: #15803d; }
+.status-done    { background: var(--border-light); color: var(--text-3); }
+.status-overdue { background: var(--amber-light);  color: #92400e; }
+
+.goal-card-deadline { font-size: 10px; color: var(--text-3); white-space: nowrap; }
+.goal-card-deadline.overdue { color: var(--red); }
+
+.goal-card-actions { display: flex; gap: 1px; flex-shrink: 0; }
+.goal-action-btn {
+  background: none; border: none; cursor: pointer;
+  font-size: 12px; color: var(--text-3); padding: 2px 3px;
+  opacity: 0; transition: opacity .15s, color .15s; line-height: 1;
+}
+.goal-card:hover .goal-action-btn { opacity: 1; }
+.goal-action-btn:hover { color: var(--accent); }
+.goal-del-btn:hover    { color: var(--red) !important; }
+
+/* Progress bar */
+.goal-progress { margin-bottom: 6px; }
+.goal-progress-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  color: var(--text-3);
+  margin-bottom: 4px;
+}
+.goal-progress-label strong { color: var(--text-2); font-weight: 600; }
+.goal-progress-bar { height: 5px; background: var(--border-light); border-radius: 3px; overflow: hidden; }
+.goal-progress-fill { height: 100%; border-radius: 3px; transition: width .55s ease; }
+.fill-red    { background: var(--red);   }
+.fill-yellow { background: var(--amber); }
+.fill-green  { background: var(--green); }
+.fill-done   { background: var(--green); }
+
+/* Subtask checklist */
+.goal-subtasks { display: flex; flex-direction: column; gap: 1px; margin-top: 6px; }
+.goal-sub-item {
+  display: flex; align-items: center; gap: 6px;
+  padding: 2px 0;
+  border-bottom: 1px solid var(--border-light);
+}
+.goal-sub-item:last-child { border-bottom: none; }
+.goal-sub-check {
+  width: 13px; height: 13px;
+  border-radius: 50%;
+  border: 1.5px solid var(--border);
+  flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  transition: all .15s;
+}
+.goal-sub-item.done .goal-sub-check { background: var(--accent); border-color: var(--accent); }
+.goal-sub-item.done .goal-sub-check::after { content: '\2713'; color: white; font-size: 8px; line-height: 1; }
+.goal-sub-name { font-size: 11px; color: var(--text-2); flex: 1; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.goal-sub-item.done .goal-sub-name { text-decoration: line-through; color: var(--text-3); }
+.goal-sub-see-all {
+  font-size: 10px; color: var(--accent); cursor: pointer;
+  margin-top: 3px; padding-left: 19px; font-weight: 500; display: inline-block;
+}
+.goal-sub-see-all:hover { opacity: .75; }
+
+.right-panel-footer { padding: 7px 10px; border-top: 1px solid var(--border-light); flex-shrink: 0; }
+.export-import-row { display: flex; gap: 6px; align-items: stretch; }
+.export-import-row .export-btn-small { flex: 1; width: auto; min-width: 0; }
+.export-btn-small {
+  width: 100%; padding: 6px;
+  background: var(--bg); color: var(--text-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 11px; cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  transition: all .15s;
+}
+.export-btn-small:hover { background: var(--border-light); color: var(--text); }
+
+/* --- Merge compatibility (original + redesign) --- */
+.legend-inline { padding: 10px 14px 8px; border-bottom: 1px solid var(--border-light); display: flex; gap: 12px; flex-wrap: wrap; flex-shrink: 0; }
+.goal-scroll.panel-scroll { flex: 1; display: flex; flex-direction: column; min-height: 0; overflow: hidden; }
+.right-panel .add-task-form { padding: 12px 14px; border-bottom: 1px solid var(--border-light); flex-shrink: 0; }
+.right-panel .export-area { display: none; }
+.pool-item-subcount { font-size: 10px; color: var(--text-3); margin-top: 2px; }
+.pool-detail-sub-add { display:flex; gap:6px; margin-top:8px; }
+.pool-detail-sub-input { flex:1; padding: 7px 10px; border: 1.5px solid var(--border); border-radius: 8px; font-size: 13px; outline: none; font-family: inherit; }
+.pool-detail-sub-input:focus { border-color: var(--accent); }
+.pool-detail-sub-btn { padding: 7px 10px; border: none; border-radius: 8px; background: var(--accent); color: white; font-weight: 700; cursor: pointer; }
+.pool-detail-sub-list { display:flex; flex-direction:column; gap:6px; margin-top:8px; max-height: 180px; overflow:auto; }
+.pool-detail-sub-item { display:flex; align-items:center; gap:8px; padding: 7px 10px; background: var(--bg); border-radius: 10px; border: 1px solid var(--border-light); }
+.pool-detail-sub-check { width: 16px; height: 16px; border-radius: 4px; border: 1.5px solid var(--border); cursor: pointer; display:flex; align-items:center; justify-content:center; font-size: 11px; color: white; flex-shrink:0; }
+.pool-detail-sub-item.done .pool-detail-sub-check { background: var(--green); border-color: var(--green); }
+.pool-detail-sub-name { flex:1; font-size: 12px; color: var(--text-2); overflow:hidden; white-space:nowrap; text-overflow:ellipsis; }
+.pool-detail-sub-item.done .pool-detail-sub-name { text-decoration: line-through; color: var(--text-3); }
+.pool-detail-sub-del { color: var(--text-3); cursor:pointer; font-size: 16px; line-height: 1; padding: 0 2px; }
+.pool-detail-sub-del:hover { color: var(--red); }
+.pool-detail-danger { background: var(--red-light) !important; color: var(--red) !important; border: 1px solid var(--red-mid) !important; }
+.pool-detail-danger:hover { background: var(--red-mid) !important; color: var(--red) !important; }
+.left-panel#taskPanel.drag-over {
+  outline: 2px dashed var(--accent);
+  outline-offset: -3px;
+  background: var(--accent-light);
+}
+.trash-drop-zone.trash-zone.drag-over {
+  border-color: var(--red) !important;
+  background: var(--red-light) !important;
+  color: var(--red) !important;
+}
+
+/* --- Monthly Review (Task Pool card + modal) --- */
+.mr-pool-card {
+  margin: 4px 10px 10px;
+  background: linear-gradient(135deg, #eef0fb 0%, #f0ecff 100%);
+  border-radius: 12px;
+  padding: 14px 14px 12px;
+  flex-shrink: 0;
+  border: 1px solid rgba(91, 95, 199, 0.12);
+}
+.mr-pool-card-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #5b21b6;
+  margin-bottom: 4px;
+}
+.mr-pool-card-sub {
+  font-size: 11px;
+  color: #6d28d9;
+  line-height: 1.5;
+  margin-bottom: 11px;
+}
+.mr-pool-card-btn {
+  width: 100%;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 10px;
+  background: var(--accent);
+  color: white;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  transition: opacity 0.15s;
+}
+.mr-pool-card-btn:hover { opacity: 0.9; }
+
+.review-overlay { display: none; position: fixed; inset: 0; background: rgba(15,15,30,.38); backdrop-filter: blur(3px); z-index: 950; align-items: center; justify-content: center; padding: 12px; }
+.review-overlay.show { display: flex; }
+.review-modal { background: var(--surface); border-radius: 18px; width: 480px; max-width: 100%; max-height: 90vh; overflow-y: auto; box-shadow: var(--shadow-xl); animation: slideUp .25s cubic-bezier(.22,1,.36,1); }
+.review-modal::-webkit-scrollbar { width: 4px; }
+.review-modal::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+.review-header { background: linear-gradient(135deg, #5b5fc7 0%, #8b87f0 60%, #b8a9f8 100%); padding: 16px 18px 13px; position: relative; overflow: hidden; }
+.review-header::after { content: ''; position: absolute; right: -20px; bottom: -30px; width: 130px; height: 130px; background: rgba(255,255,255,.07); border-radius: 50%; }
+.review-header-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 2px; position: relative; z-index: 1; }
+.review-month-label { font-size: 10px; font-weight: 600; color: rgba(255,255,255,.7); text-transform: uppercase; letter-spacing: .75px; }
+.review-close-btn { background: rgba(255,255,255,.18); border: none; color: white; width: 26px; height: 26px; border-radius: 50%; cursor: pointer; font-size: 15px; display: flex; align-items: center; justify-content: center; transition: background .15s; flex-shrink: 0; }
+.review-close-btn:hover { background: rgba(255,255,255,.3); }
+.review-headline { font-size: 18px; font-weight: 700; color: white; line-height: 1.28; margin-bottom: 2px; position: relative; z-index: 1; }
+.review-subline { font-size: 11px; color: rgba(255,255,255,.74); line-height: 1.45; position: relative; z-index: 1; }
+/* Row 1: three equal KPIs; row 2: two KPIs centered */
+.review-kpis {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 8px;
+  padding: 12px 16px 0;
+}
+.review-kpi { background: var(--bg); border-radius: 10px; padding: 10px 8px 9px; text-align: center; }
+.review-kpi:nth-child(1),
+.review-kpi:nth-child(2),
+.review-kpi:nth-child(3) { grid-column: span 2; }
+.review-kpi:nth-child(4) { grid-column: 2 / span 2; }
+.review-kpi:nth-child(5) { grid-column: 4 / span 2; }
+.review-kpi-num { font-size: 20px; font-weight: 700; color: var(--accent); line-height: 1.08; margin-bottom: 2px; }
+.review-kpi-num.green { color: var(--green); }
+.review-kpi-num.amber { color: var(--amber); }
+.review-kpi-label { font-size: 10px; color: var(--text-3); font-weight: 500; line-height: 1.32; }
+.review-body { padding: 12px 16px 14px; }
+.review-narrative { font-size: 12px; color: var(--text-2); line-height: 1.72; background: linear-gradient(135deg,#f5f3ff,#f0f4ff); border-radius: 10px; padding: 11px 13px; margin-bottom: 10px; border: 1px solid rgba(91,95,199,.08); }
+.review-narrative p { margin: 0 0 6px; }
+.review-narrative p:last-child { margin: 0; }
+.review-narrative strong { color: var(--accent); }
+.review-cta { width: 100%; padding: 10px; background: var(--accent); color: white; border: none; border-radius: 11px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: 'Inter', sans-serif; transition: opacity .15s; margin-top: 2px; }
+.review-cta:hover { opacity: .88; }
+
 </style>
 </head>
 <body>
 
-<!-- 顶部导航 -->
-<div class="header">
-  <h1>🗓 Light Planner</h1>
-  <div class="nav-btns">
-    <button onclick="changeMonth(-1)">‹ 上月</button>
-    <span class="month-title" id="monthTitle">2026年4月</span>
-    <button onclick="changeMonth(1)">下月 ›</button>
-    <!-- 今日按钮：点击切换到当月并高亮今天 -->
-    <button class="btn-today" onclick="goToToday()" title="回到今天">今日</button>
+<div class="app">
+
+<!-- TOP STATS BAR -->
+<div class="top-header">
+  <div class="brand">
+    <div class="brand-name"><span class="brand-dot"></span> Light Planner</div>
+    <div class="brand-sub" id="dailyQuote"></div>
   </div>
-  <div class="header-tip" id="dailyQuote"></div>
+  <div class="header-stats">
+    <div class="hstat">
+      <div class="hstat-label">Monthly</div>
+      <div class="hstat-label" id="hstatMonth" style="font-size:11px;color:var(--text-2);font-weight:600;margin-top:1px;"></div>
+    </div>
+    <div class="hstat">
+      <div class="hstat-label">Total Tasks</div>
+      <div class="hstat-value" id="hstatTotal">0 <span class="hstat-arr">›</span></div>
+    </div>
+    <div class="hstat">
+      <div class="hstat-label">Completed</div>
+      <div class="hstat-value green" id="hstatDone">0 <span class="hstat-arr">›</span></div>
+    </div>
+    <div class="hstat">
+      <div class="hstat-label">Pending</div>
+      <div class="hstat-value red" id="hstatPending">0 <span class="hstat-arr">›</span></div>
+    </div>
+    <div class="hstat">
+      <div class="hstat-label">Rate</div>
+      <div class="hstat-value amber" id="hstatRate">0% <span class="hstat-arr">›</span></div>
+    </div>
+    <div class="hstat-priority">
+      <div class="hstat-p-item">
+        <div class="hstat-p-dot" style="background:var(--red)"></div>
+        <div class="hstat-p-label">Important</div>
+        <div class="hstat-p-value" id="hstatRed">0</div>
+      </div>
+      <div class="hstat-p-item">
+        <div class="hstat-p-dot" style="background:var(--accent)"></div>
+        <div class="hstat-p-label">Normal</div>
+        <div class="hstat-p-value" id="hstatYellow">0</div>
+      </div>
+      <div class="hstat-p-item">
+        <div class="hstat-p-dot" style="background:var(--green)"></div>
+        <div class="hstat-p-label">Easy</div>
+        <div class="hstat-p-value" id="hstatGreen">0</div>
+      </div>
+    </div>
+  </div>
+  <div class="header-actions">
+    <div class="header-icon-btn" title="Search (placeholder)">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    </div>
+    <div class="header-icon-btn" title="Notifications (placeholder)">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+    </div>
+    <div class="header-user">
+      <div class="avatar">LP</div>
+      <span class="header-user-name">Learner</span>
+    </div>
+  </div>
 </div>
 
-<div class="main-layout">
+<div class="app-body">
 
-  <!-- ===== 左侧：总任务区 ===== -->
-  <aside class="task-panel" id="taskPanel"
-    ondragover="onPanelDragOver(event)"
-    ondragleave="onPanelDragLeave(event)"
-    ondrop="onDropToPanel(event)">
+<!-- LEFT: Task Pool -->
+<div class="left-panel" id="taskPanel"
+  ondragover="onPanelDragOver(event)"
+  ondragleave="onPanelDragLeave(event)"
+  ondrop="onDropToPanel(event)">
 
-    <div class="task-panel-header"><span>🎯</span> MY PLAN</div>
+  <div class="left-panel-header">
+    <div class="quick-add-label">Quick add</div>
+    <div class="quick-add-wrap">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--text-3)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      <input class="quick-add-input" id="quickAddInput" placeholder="Add a pool task..." onkeydown="if(event.key==='Enter'){event.preventDefault();quickAddPoolTask();}" />
+      <span class="quick-add-kbd">↵</span>
+    </div>
+  </div>
 
-    <!-- 颜色图例 -->
-    <div class="legend">
-      <div class="legend-item"><div class="legend-dot" style="background:#ff4d4f"></div>重要</div>
-      <div class="legend-item"><div class="legend-dot" style="background:#c49900"></div>一般</div>
-      <div class="legend-item"><div class="legend-dot" style="background:#52c41a"></div>轻松</div>
+  <div class="pool-section">
+    <div class="pool-header">
+      <div class="pool-title">
+        Task Pool
+        <span class="pool-count-label" id="poolCountLabel"></span>
+      </div>
+      <button type="button" class="pool-add-btn" onclick="openPoolDetailModal(null)">+ Add</button>
+    </div>
+    <div class="pool-filter-tabs">
+      <button type="button" class="pool-filter-tab active" onclick="filterPoolTab('all', this)">All <span class="pool-tab-count" id="tabCountAll">0</span></button>
+      <button type="button" class="pool-filter-tab" onclick="filterPoolTab('red', this)">Important <span class="pool-tab-count" id="tabCountRed">0</span></button>
+      <button type="button" class="pool-filter-tab" onclick="filterPoolTab('yellow', this)">Normal <span class="pool-tab-count" id="tabCountYellow">0</span></button>
+      <button type="button" class="pool-filter-tab" onclick="filterPoolTab('green', this)">Easy <span class="pool-tab-count" id="tabCountGreen">0</span></button>
+    </div>
+    <div class="pool-list" id="mainPoolList"></div>
+    <div class="mr-pool-card">
+      <div class="mr-pool-card-title">Monthly Review</div>
+      <div class="mr-pool-card-sub">See what you completed this month 🌱</div>
+      <button type="button" class="mr-pool-card-btn" onclick="openMonthReview()">View review</button>
+    </div>
+  </div>
+</div>
+
+<!-- CENTER: Calendar -->
+<div class="main-content">
+  <div class="cal-header">
+    <div class="cal-title" id="monthTitle">April 2026</div>
+    <button type="button" class="cal-nav-btn" onclick="changeMonth(-1)" title="Previous month">‹</button>
+    <button type="button" class="cal-today-btn" onclick="goToToday()">Today</button>
+    <button type="button" class="cal-nav-btn" onclick="changeMonth(1)" title="Next month">›</button>
+  </div>
+  <div class="cal-grid-wrap">
+    <div class="cal-weekdays">
+      <div class="cal-weekday">Mon</div>
+      <div class="cal-weekday">Tue</div>
+      <div class="cal-weekday">Wed</div>
+      <div class="cal-weekday">Thu</div>
+      <div class="cal-weekday">Fri</div>
+      <div class="cal-weekday weekend">Sat</div>
+      <div class="cal-weekday weekend">Sun</div>
+    </div>
+    <div class="cal-grid" id="calendarGrid"></div>
+  </div>
+  <div class="trash-zone trash-drop-zone" id="trashDropZone"
+    ondragover="onTrashDragOver(event)"
+    ondragleave="onTrashDragLeave(event)"
+    ondrop="onTrashDrop(event)">
+    🗑&nbsp; Drag here to remove from calendar
+  </div>
+  <div class="bottom-bar">
+    <div class="bottom-bar-dot"></div>
+    <span class="bottom-bar-step">Capture tasks</span>
+    <span class="bottom-bar-arr">→</span>
+    <span class="bottom-bar-step">Break down goals</span>
+    <span class="bottom-bar-arr">→</span>
+    <span class="bottom-bar-step">Schedule time</span>
+    <span class="bottom-bar-arr">→</span>
+    <span class="bottom-bar-step">Complete</span>
+    <span class="bottom-bar-arr">→</span>
+    <span class="bottom-bar-step">Review &amp; celebrate 🌟</span>
+  </div>
+</div>
+
+<!-- RIGHT: My Plan / Goals -->
+<div class="right-panel">
+  <div class="right-panel-header">
+    <div class="right-panel-title-wrap">
+      <span class="right-panel-title">My Goals</span>
+    </div>
+    <button type="button" class="new-goal-btn" onclick="focusNewGoalForm()">+ New Goal</button>
+  </div>
+
+  <div class="goal-scroll panel-scroll">
+    <div class="legend legend-inline">
+      <div class="legend-item"><div class="legend-dot" style="background:var(--red)"></div>Important</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--amber)"></div>Normal</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div>Easy</div>
     </div>
 
-    <!-- 添加任务表单 -->
     <div class="add-task-form">
-      <input type="text" id="newTaskName" placeholder="Plan 名称" />
+      <input type="text" id="newTaskName" placeholder="Goal name" />
       <div class="form-row">
-        <label>目标(h)：</label>
+        <label>Target (h)</label>
         <input type="number" id="newTaskTotalHours" placeholder="50" min="0" step="0.5" style="width:70px" />
         <select id="newTaskLevel">
-          <option value="red">🔴 重要</option>
-          <option value="yellow" selected>🟡 一般</option>
-          <option value="green">🟢 轻松</option>
+          <option value="red">🔴 Important</option>
+          <option value="yellow" selected>🟡 Normal</option>
+          <option value="green">🟢 Easy</option>
         </select>
       </div>
       <div class="form-row">
-        <label>截止日期：</label>
+        <label>Deadline</label>
         <input type="date" id="newTaskDeadline" style="flex:1;" />
       </div>
-      <textarea id="newTaskNote" placeholder="备注（可选）..." style="min-height:38px;font-size:13px;border:1.5px solid #e8e8e8;border-radius:8px;padding:7px 10px;resize:vertical;outline:none;" onfocus="this.style.borderColor='#667eea'" onblur="this.style.borderColor='#e8e8e8'"></textarea>
+      <textarea id="newTaskNote" placeholder="Notes (optional)..." style="min-height:38px;font-size:13px;border:1.5px solid var(--border);border-radius:8px;padding:7px 10px;resize:vertical;outline:none;font-family:inherit;" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'"></textarea>
 
-      <!-- Plan 子任务（目标拆解，可选） -->
       <div class="plan-sub-section">
-        <label>阶段目标（可选）</label>
+        <label>Milestones (optional)</label>
         <div class="plan-sub-add-row">
-          <input type="text" id="newPlanSubInput" class="plan-sub-input" placeholder="添加阶段目标，按 Enter 确认"
+          <input type="text" id="newPlanSubInput" class="plan-sub-input" placeholder="Add milestone, press Enter"
             onkeydown="if(event.key==='Enter'){event.preventDefault();addNewPlanSub();}" />
-          <button class="plan-sub-add-btn" onclick="addNewPlanSub()">+</button>
+          <button type="button" class="plan-sub-add-btn" onclick="addNewPlanSub()">+</button>
         </div>
         <div class="plan-sub-list" id="newPlanSubList"></div>
       </div>
 
-      <button class="add-btn" onclick="addMainTask()">＋ 添加</button>
+      <button type="button" class="add-btn" onclick="addMainTask()">+ Add goal</button>
     </div>
 
-    <div class="task-list" id="mainTaskList"></div>
+    <div class="goal-list task-list" id="mainTaskList"></div>
+  </div>
 
-    <!-- 导出数据按钮 -->
-    <div class="export-area">
-      <button class="export-btn" onclick="exportData()">导出数据</button>
+  <div class="right-panel-footer">
+    <div class="export-import-row">
+      <button type="button" class="export-btn-small" onclick="exportData()">⬇ Export data</button>
+      <button type="button" class="export-btn-small" onclick="triggerImportData()">⬆ Import data</button>
     </div>
-
-  </aside>
-
-  <!-- ===== 右侧：日历 ===== -->
-  <div class="calendar-area">
-    <div class="stats-bar" id="statsBar"></div>
-
-    <!-- 星期标题 -->
-    <div class="weekdays">
-      <div class="weekday-cell weekend">周日</div>
-      <div class="weekday-cell">周一</div>
-      <div class="weekday-cell">周二</div>
-      <div class="weekday-cell">周三</div>
-      <div class="weekday-cell">周四</div>
-      <div class="weekday-cell">周五</div>
-      <div class="weekday-cell weekend">周六</div>
-    </div>
-    <div class="calendar-grid" id="calendarGrid"></div>
-    <!-- 月视图底部：拖拽删除区域（任务拖到此处可删除） -->
-    <div class="trash-drop-zone" id="trashDropZone"
-      ondragover="onTrashDragOver(event)"
-      ondragleave="onTrashDragLeave(event)"
-      ondrop="onTrashDrop(event)">
-      <span class="trash-icon">🗑</span>
-      <span class="trash-label">拖到这里删除任务</span>
-    </div>
+    <input type="file" id="importPlannerFile" accept=".json,application/json" hidden
+      onchange="onImportPlannerFile(event)" />
   </div>
 </div>
 
-<!-- 添加日程弹窗 -->
+</div>
+</div>
+
+<!-- Add schedule modal -->
 <div class="modal-overlay" id="modalOverlay">
   <div class="modal">
-    <h3 id="modalTitle">添加日程</h3>
-    <label>任务名称 *</label>
-    <input type="text" id="modalTaskName" placeholder="输入任务名称..." />
-    <label>日期</label>
+    <h3 id="modalTitle">Add schedule</h3>
+    <label>Task name *</label>
+    <input type="text" id="modalTaskName" placeholder="What will you do?" />
+    <label>Date</label>
     <input type="date" id="modalDate" onchange="onModalDateChange()" />
-    <label>开始时间</label>
+    <label>Start time</label>
     <select id="modalStartHour" onchange="onModalTimeChange()"></select>
-    <label>时长</label>
+    <label>Duration</label>
     <select id="modalEndHour" onchange="onModalTimeChange()"></select>
     <div id="modalTimePreview" style="font-size:11px;color:#888;margin-top:3px;"></div>
     <div id="modalOccupiedHint" style="font-size:11px;color:#999;margin-top:4px;"></div>
-    <label>任务等级</label>
+    <label>Priority</label>
     <select id="modalLevel">
-      <option value="red">🔴 重要</option>
-      <option value="yellow" selected>🟡 一般</option>
-      <option value="green">🟢 轻松</option>
+      <option value="red">🔴 Important</option>
+      <option value="yellow" selected>🟡 Normal</option>
+      <option value="green">🟢 Easy</option>
     </select>
-    <label>备注</label>
-    <textarea id="modalNote" placeholder="备注（可选）..."></textarea>
-    <!-- 绑定 Plan -->
-    <label>绑定 Plan（可选）</label>
+    <label>Note</label>
+    <textarea id="modalNote" placeholder="Notes (optional)..."></textarea>
+    <label>Link goal (optional)</label>
     <select id="modalPlanId">
-      <option value="">— 不绑定 Plan —</option>
+      <option value="">— No goal linked —</option>
     </select>
-    <!-- 子任务输入区域 -->
     <div id="modalSubtaskArea">
       <label style="margin-top:12px;display:flex;align-items:center;justify-content:space-between;">
-        <span>📋 子任务（可选）</span>
-        <button type="button" onclick="addModalSubtask()" style="background:none;border:none;color:#667eea;font-size:13px;cursor:pointer;padding:2px 6px;">+ 添加子任务</button>
+        <span>📋 Subtasks (optional)</span>
+        <button type="button" onclick="addModalSubtask()" style="background:none;border:none;color:#667eea;font-size:13px;cursor:pointer;padding:2px 6px;">+ Add subtask</button>
       </label>
       <div id="modalSubtaskList" style="display:flex;flex-direction:column;gap:6px;margin-top:6px;"></div>
     </div>
     <div class="modal-btns">
-      <button class="btn-cancel" onclick="closeModal()">取消</button>
-      <button class="btn-confirm" onclick="confirmModal()">确认添加</button>
+      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+      <button class="btn-confirm" onclick="confirmModal()">Save</button>
     </div>
   </div>
 </div>
 
-<!-- 进度录入弹窗 -->
+<!-- Progress modal -->
 <div class="progress-modal-overlay" id="progressOverlay">
   <div class="progress-modal">
-    <h3 id="progTaskName">录入进度</h3>
+    <h3 id="progTaskName">Log progress</h3>
     <div class="progress-info" id="progInfo"></div>
     <div class="progress-form">
-      <label>本次完成时长（小时）</label>
-      <input type="number" id="progHours" placeholder="如：3" min="0.5" step="0.5" />
+      <label>Hours completed this time</label>
+      <input type="number" id="progHours" placeholder="e.g. 3" min="0.5" step="0.5" />
       <div class="modal-btns">
-        <button class="btn-cancel" onclick="closeProgressModal()">取消</button>
-        <button class="btn-confirm" onclick="confirmProgress()">✓ 完成并记录</button>
+        <button class="btn-cancel" onclick="closeProgressModal()">Cancel</button>
+        <button class="btn-confirm" onclick="confirmProgress()">✓ Done</button>
       </div>
     </div>
   </div>
@@ -1211,7 +2231,7 @@
 <div class="dayview-overlay" id="dayviewOverlay">
   <div class="dayview-modal">
     <div class="dayview-header">
-      <span class="dayview-title" id="dayviewTitle">日视图</span>
+      <span class="dayview-title" id="dayviewTitle">Day view</span>
       <button class="dayview-close" onclick="closeDayView()">×</button>
     </div>
     <div class="dayview-body" id="dayviewBody">
@@ -1221,19 +2241,19 @@
         ondragleave="onDvPoolDragLeave(event)"
         ondrop="onDvPoolDrop(event)">
         <!-- 任务池标题 -->
-        <div class="dv-pool-title">📥 任务池</div>
+        <div class="dv-pool-title">📥 Task pool</div>
         <!-- 添加任务到任务池的表单 -->
         <div class="dv-pool-add-form" id="dvPoolAddForm">
           <!-- 任务名称（必填，Enter 快捷提交） -->
-          <input type="text" id="dvPoolNewName" placeholder="任务名称..." class="dv-pool-input"
+          <input type="text" id="dvPoolNewName" placeholder="Task name..." class="dv-pool-input"
             onkeydown="if(event.key==='Enter')addDvPoolTask()" />
           <!-- 绑定 Plan（可选） -->
           <select id="dvPoolNewPlan" class="dv-pool-select" style="font-size:10px;"></select>
-          <button class="dv-pool-add-btn" onclick="addDvPoolTask()">+ 加入</button>
+          <button class="dv-pool-add-btn" onclick="addDvPoolTask()">+ Add</button>
           <!-- 任务池子任务（执行步骤，可选） -->
           <div class="pool-form-sub-section" id="poolFormSubSection">
             <div class="pool-form-sub-add-row">
-              <input type="text" id="poolFormSubInput" class="pool-form-sub-input" placeholder="子任务（可选）"
+              <input type="text" id="poolFormSubInput" class="pool-form-sub-input" placeholder="Subtask (optional)"
                 onkeydown="if(event.key==='Enter'){event.preventDefault();addPoolFormSub();}" />
               <button class="pool-form-sub-add-btn" onclick="addPoolFormSub()">+</button>
             </div>
@@ -1254,31 +2274,29 @@
     </div>
     <div class="dayview-footer">
       <div class="dv-stat" id="dayviewStat"></div>
-      <button class="dv-copy-day-btn" onclick="openCopyDayModal()" title="复制当天全部任务到其他日期">📋 复制到其他日期</button>
-      <button class="dv-add-btn" id="dayviewAddBtn" onclick="openDayViewAdd()">+ 添加日程</button>
+      <button class="dv-copy-day-btn" onclick="openCopyDayModal()" title="Copy all tasks to another date">📋 Copy day</button>
+      <button class="dv-add-btn" id="dayviewAddBtn" onclick="openDayViewAdd()">+ Add schedule</button>
     </div>
   </div>
 </div>
 
-<!-- 复制当天任务弹窗 -->
+<!-- Copy day modal -->
 <div class="copy-day-overlay" id="copyDayOverlay">
   <div class="copy-day-modal">
     <div class="copy-day-header">
-      <span class="copy-day-title">📋 复制当天任务</span>
+      <span class="copy-day-title">📋 Copy this day</span>
       <button class="copy-day-close" onclick="closeCopyDayModal()">×</button>
     </div>
     <div class="copy-day-body">
-      <div class="copy-day-info" id="copyDayInfo">
-        <!-- 当天任务预览 -->
-      </div>
+      <div class="copy-day-info" id="copyDayInfo"></div>
       <div style="margin-top:14px;">
-        <label style="font-size:13px;color:#555;display:block;margin-bottom:6px;">选择目标日期</label>
+        <label style="font-size:13px;color:#555;display:block;margin-bottom:6px;">Target date</label>
         <input type="date" id="copyDayTarget" class="copy-day-date-input" />
       </div>
     </div>
     <div class="copy-day-footer">
-      <button class="btn-cancel" onclick="closeCopyDayModal()">取消</button>
-      <button class="btn-confirm" onclick="confirmCopyDay()">✓ 确认复制</button>
+      <button class="btn-cancel" onclick="closeCopyDayModal()">Cancel</button>
+      <button class="btn-confirm" onclick="confirmCopyDay()">✓ Copy</button>
     </div>
   </div>
 </div>
@@ -1288,7 +2306,7 @@
   <div class="task-detail-modal">
     <div class="task-detail-header">
       <div>
-        <div class="task-detail-title" id="tdTitle">任务详情</div>
+        <div class="task-detail-title" id="tdTitle">Task detail</div>
         <span class="task-detail-badge" id="tdBadge"></span>
       </div>
       <button class="dayview-close" style="position:static;width:28px;height:28px;font-size:16px;" onclick="closeTaskDetail()">×</button>
@@ -1298,139 +2316,219 @@
     <!-- 编辑时间按钮（默认显示） -->
     <div id="tdEditTimeBtnArea" style="margin-bottom:14px;">
       <button class="td-info-btn" onclick="showTdEditMode()">
-        ⏰ 编辑时间
+        ⏰ Edit time
       </button>
     </div>
 
     <!-- 编辑时间表单（默认隐藏） -->
     <div id="tdEditSection" class="td-edit-section" style="display:none;">
-      <h4>⏰ 修改时间</h4>
+      <h4>⏰ Edit time</h4>
       <div class="td-edit-row">
-        <label>日期</label>
+        <label>Date</label>
         <input type="date" id="tdEditDate" onchange="updateTdEditOccupiedHint()" />
       </div>
       <div class="td-edit-row">
-        <label>开始</label>
+        <label>Start</label>
         <div class="td-edit-time">
           <select id="tdEditStartHour" onchange="updateTdEditOccupiedHint()"></select>
-          <span>时长</span>
+          <span>Duration</span>
           <select id="tdEditEndHour" onchange="updateTdEditOccupiedHint()"></select>
         </div>
       </div>
       <div class="td-edit-hint" id="tdEditHint"></div>
       <div class="td-edit-btns">
-        <button class="td-btn-cancel-edit" onclick="cancelTdEdit()">取消</button>
-        <button class="td-btn-edit-time" onclick="confirmTdEdit()">✓ 保存</button>
+        <button class="td-btn-cancel-edit" onclick="cancelTdEdit()">Cancel</button>
+        <button class="td-btn-edit-time" onclick="confirmTdEdit()">✓ Save</button>
       </div>
     </div>
 
     <!-- 子任务区 -->
     <div class="task-detail-section" id="tdSubSection">
-      <div class="task-detail-section-title">📋 子任务 <span id="tdSubCount" style="font-weight:400;font-size:12px;color:#999">0 / 0</span></div>
+      <div class="task-detail-section-title">📋 Subtasks <span id="tdSubCount" style="font-weight:400;font-size:12px;color:#999">0 / 0</span></div>
       <div class="subtask-list" id="tdSubtaskList"></div>
       <div class="add-subtask-form">
-        <input type="text" class="add-subtask-input" id="tdNewSub" placeholder="添加子任务..." onkeydown="if(event.key==='Enter')addSubtask()"/>
-        <button class="add-subtask-btn" onclick="addSubtask()">添加</button>
+        <input type="text" class="add-subtask-input" id="tdNewSub" placeholder="Add subtask..." onkeydown="if(event.key==='Enter')addSubtask()"/>
+        <button class="add-subtask-btn" onclick="addSubtask()">Add</button>
       </div>
     </div>
     <div class="task-detail-btns">
-      <button class="btn-cancel" onclick="closeTaskDetail()">关闭</button>
-      <button class="btn-done" id="tdDoneBtn" onclick="tdMarkDone()">✓ 标记完成</button>
-      <button class="btn-del" onclick="tdDelete()">✕ 删除</button>
+      <button class="btn-cancel" onclick="closeTaskDetail()">Close</button>
+      <button class="btn-done" id="tdDoneBtn" onclick="tdMarkDone()">✓ Done</button>
+      <button class="btn-del" onclick="tdDelete()">✕ Delete</button>
     </div>
   </div>
 </div>
 
-<!-- 任务池→时间轴 安排弹窗 -->
+<!-- Pool → timeline schedule -->
 <div class="modal-overlay" id="poolScheduleOverlay">
   <div class="pool-schedule-modal">
-    <h3 id="poolScheduleTitle">📅 安排任务时间</h3>
+    <h3 id="poolScheduleTitle">📅 Schedule task</h3>
     <div style="font-size:13px;color:#666;margin-bottom:12px;">
-      将「<strong id="poolScheduleTaskName"></strong>」安排到 <strong id="poolScheduleDate"></strong>
+      Schedule <strong id="poolScheduleTaskName"></strong> on <strong id="poolScheduleDate"></strong>
     </div>
 
-    <label style="font-size:13px;color:#666;display:block;margin-bottom:4px;">开始时间</label>
+    <label style="font-size:13px;color:#666;display:block;margin-bottom:4px;">Start time</label>
     <select id="poolScheduleStart" style="width:100%;padding:8px;border:1.5px solid #e8e8e8;border-radius:8px;font-size:13px;outline:none;"></select>
 
-    <label style="font-size:13px;color:#666;display:block;margin-top:10px;margin-bottom:4px;">时长</label>
+    <label style="font-size:13px;color:#666;display:block;margin-top:10px;margin-bottom:4px;">Duration</label>
     <select id="poolScheduleDur" style="width:100%;padding:8px;border:1.5px solid #e8e8e8;border-radius:8px;font-size:13px;outline:none;"></select>
     <div id="poolSchedulePreview" style="font-size:11px;color:#888;margin-top:4px;"></div>
     <div id="poolScheduleConflict" style="font-size:11px;color:#ff4d4f;margin-top:4px;display:none;"></div>
 
-    <!-- 重要性选择（新增） -->
-    <label style="font-size:13px;color:#666;display:block;margin-top:10px;margin-bottom:4px;">重要性</label>
+    <label style="font-size:13px;color:#666;display:block;margin-top:10px;margin-bottom:4px;">Priority</label>
     <select id="poolScheduleLevel" style="width:100%;padding:8px;border:1.5px solid #e8e8e8;border-radius:8px;font-size:13px;outline:none;">
-      <option value="red">🔴 重要</option>
-      <option value="yellow" selected>🟡 一般</option>
-      <option value="green">🟢 轻松</option>
+      <option value="red">🔴 Important</option>
+      <option value="yellow" selected>🟡 Normal</option>
+      <option value="green">🟢 Easy</option>
     </select>
 
-    <!-- 子任务输入（新增） -->
-    <label style="font-size:13px;color:#666;display:block;margin-top:10px;margin-bottom:4px;">子任务（可选）</label>
+    <label style="font-size:13px;color:#666;display:block;margin-top:10px;margin-bottom:4px;">Subtasks (optional)</label>
     <div class="ps-subtask-add-row">
-      <input type="text" id="psSubtaskInput" class="ps-subtask-input" placeholder="输入子任务后按 Enter 或点击 +"
+      <input type="text" id="psSubtaskInput" class="ps-subtask-input" placeholder="Subtask, Enter or +"
         onkeydown="if(event.key==='Enter'){event.preventDefault();addPsSubtask();}" />
       <button class="ps-subtask-add-btn" onclick="addPsSubtask()">+</button>
     </div>
     <div id="psSubtaskList" class="ps-subtask-list"></div>
 
     <div class="modal-btns" style="margin-top:16px;">
-      <button class="btn-cancel" onclick="closePoolSchedule()">取消</button>
-      <button class="btn-confirm" onclick="confirmPoolSchedule()">✓ 安排</button>
+      <button class="btn-cancel" onclick="closePoolSchedule()">Cancel</button>
+      <button class="btn-confirm" onclick="confirmPoolSchedule()">✓ Schedule</button>
     </div>
   </div>
 </div>
 
-<!-- 调整时间弹窗 -->
+<!-- Adjust time modal -->
 <div class="modal-overlay" id="adjustTimeOverlay">
   <div class="modal">
-    <h3 id="adjTitle">⏰ 调整时间</h3>
+    <h3 id="adjTitle">⏰ Adjust time</h3>
     <div id="adjMessage" style="font-size:13px;color:#666;margin:10px 0 16px;line-height:1.6;"></div>
-    <label>新的开始时间</label>
+    <label>New start time</label>
     <select id="adjStartHour"></select>
     <div id="adjOccupiedHint" style="font-size:11px;color:#999;margin-top:4px;"></div>
-    <label style="margin-top:12px;">时长</label>
+    <label style="margin-top:12px;">Duration</label>
     <select id="adjEndHour"></select>
     <div class="modal-btns" style="margin-top:20px;">
-      <button class="btn-cancel" onclick="cancelAdjustTime()">取消</button>
-      <button class="btn-confirm" onclick="confirmAdjustTime()">确认调整</button>
+      <button class="btn-cancel" onclick="cancelAdjustTime()">Cancel</button>
+      <button class="btn-confirm" onclick="confirmAdjustTime()">Save</button>
     </div>
   </div>
 </div>
 
-<!-- 编辑 Plan 弹窗 -->
+<!-- Edit goal modal -->
 <div class="modal-overlay" id="editPlanOverlay">
   <div class="modal">
-    <h3>✏️ 编辑 Plan</h3>
-    <label>Plan 名称 *</label>
-    <input type="text" id="editPlanName" placeholder="输入 Plan 名称..." />
-    <label>目标时长（小时）</label>
-    <input type="number" id="editPlanTotalHours" placeholder="如：50" min="0" step="0.5" />
-    <label>重要性</label>
+    <h3>✏️ Edit goal</h3>
+    <label>Goal name *</label>
+    <input type="text" id="editPlanName" placeholder="Goal name..." />
+    <label>Target hours</label>
+    <input type="number" id="editPlanTotalHours" placeholder="e.g. 50" min="0" step="0.5" />
+    <label>Priority</label>
     <select id="editPlanLevel">
-      <option value="red">🔴 重要</option>
-      <option value="yellow">🟡 一般</option>
-      <option value="green">🟢 轻松</option>
+      <option value="red">🔴 Important</option>
+      <option value="yellow">🟡 Normal</option>
+      <option value="green">🟢 Easy</option>
     </select>
-    <label>截止日期（可选）</label>
+    <label>Deadline (optional)</label>
     <input type="date" id="editPlanDeadline" />
-    <label>备注（可选）</label>
-    <textarea id="editPlanNote" placeholder="备注内容..."></textarea>
+    <label>Note (optional)</label>
+    <textarea id="editPlanNote" placeholder="Notes..."></textarea>
 
-    <!-- Plan 子任务编辑区 -->
     <div class="plan-sub-section">
-      <label>阶段目标</label>
+      <label>Milestones</label>
       <div class="plan-sub-add-row">
-        <input type="text" id="editPlanSubInput" class="plan-sub-input" placeholder="新增阶段目标，按 Enter 确认"
+        <input type="text" id="editPlanSubInput" class="plan-sub-input" placeholder="Add milestone, Enter to confirm"
           onkeydown="if(event.key==='Enter'){event.preventDefault();addEditPlanSub();}" />
-        <button class="plan-sub-add-btn" onclick="addEditPlanSub()">+</button>
+        <button type="button" class="plan-sub-add-btn" onclick="addEditPlanSub()">+</button>
       </div>
       <div class="plan-sub-list" id="editPlanSubList"></div>
     </div>
 
     <div class="modal-btns">
-      <button class="btn-cancel" onclick="closeEditPlan()">取消</button>
-      <button class="btn-confirm" onclick="confirmEditPlan()">✓ 保存修改</button>
+      <button class="btn-cancel" onclick="closeEditPlan()">Cancel</button>
+      <button class="btn-confirm" onclick="confirmEditPlan()">✓ Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Task Pool Detail modal (create/edit pool task) -->
+<div class="modal-overlay" id="poolDetailOverlay">
+  <div class="modal">
+    <h3 id="poolDetailTitle">Task details</h3>
+
+    <label>Task name *</label>
+    <input type="text" id="poolDetailName" placeholder="Task name..." />
+
+    <label>Priority</label>
+    <select id="poolDetailLevel">
+      <option value="red">🔴 Important</option>
+      <option value="yellow" selected>🟡 Normal</option>
+      <option value="green">🟢 Easy</option>
+    </select>
+
+    <label>Linked goal (optional)</label>
+    <select id="poolDetailGoal">
+      <option value="">— No goal linked —</option>
+    </select>
+
+    <label>Note (optional)</label>
+    <textarea id="poolDetailNote" placeholder="Notes..."></textarea>
+
+    <label>Subtasks (optional)</label>
+    <div class="pool-detail-sub-add">
+      <input type="text" id="poolDetailSubInput" class="pool-detail-sub-input" placeholder="Add a subtask and press Enter"
+        onkeydown="if(event.key==='Enter'){event.preventDefault();addPoolDetailSubtask();}" />
+      <button type="button" class="pool-detail-sub-btn" onclick="addPoolDetailSubtask()">+</button>
+    </div>
+    <div id="poolDetailSubList" class="pool-detail-sub-list"></div>
+
+    <div class="modal-btns" style="margin-top:16px; flex-wrap: wrap;">
+      <button class="btn-cancel" onclick="closePoolDetailModal()">Cancel</button>
+      <button class="btn-confirm" onclick="savePoolDetailModal()">Save</button>
+    </div>
+    <div class="modal-btns" id="poolDetailDeleteRow" style="margin-top:10px; display:none;">
+      <button class="btn-cancel pool-detail-danger" onclick="deletePoolDetailModal()">Delete task</button>
+    </div>
+  </div>
+</div>
+
+<!-- Monthly Review modal -->
+<div class="review-overlay" id="reviewOverlay" onclick="if(event.target===this)closeMonthReview()">
+  <div class="review-modal" role="dialog" aria-labelledby="reviewHeadline">
+    <div class="review-header">
+      <div class="review-header-top">
+        <div>
+          <div class="review-month-label" id="reviewMonthPeriod"></div>
+          <div class="review-headline" id="reviewHeadline"></div>
+          <div class="review-subline" id="reviewSubline"></div>
+        </div>
+        <button type="button" class="review-close-btn" onclick="closeMonthReview()" aria-label="Close">×</button>
+      </div>
+    </div>
+    <div class="review-kpis">
+      <div class="review-kpi">
+        <div class="review-kpi-num green" id="reviewKpiCompleted">0</div>
+        <div class="review-kpi-label">Completed tasks</div>
+      </div>
+      <div class="review-kpi">
+        <div class="review-kpi-num" id="reviewKpiTotal">0</div>
+        <div class="review-kpi-label">Scheduled tasks</div>
+      </div>
+      <div class="review-kpi">
+        <div class="review-kpi-num amber" id="reviewKpiRate">0%</div>
+        <div class="review-kpi-label">Completion rate</div>
+      </div>
+      <div class="review-kpi">
+        <div class="review-kpi-num" id="reviewKpiHours">0h</div>
+        <div class="review-kpi-label">Focused hours</div>
+      </div>
+      <div class="review-kpi">
+        <div class="review-kpi-num" id="reviewKpiGoals">0</div>
+        <div class="review-kpi-label">Active goals</div>
+      </div>
+    </div>
+    <div class="review-body">
+      <div class="review-narrative" id="reviewNarrative"></div>
+      <button type="button" class="review-cta" onclick="closeMonthReview()">Keep going 🌱</button>
     </div>
   </div>
 </div>
@@ -1457,6 +2555,8 @@ let currentMonth = 4;
 let mainTasks = [];
 let calTasks  = [];
 let taskPool  = [];  // 待安排任务池
+/** @type {'all'|'red'|'yellow'|'green'} */
+let poolFilterLevel = 'all';
 let nextId    = 1;
 
 // 添加日程弹窗内的临时子任务数组
@@ -1475,9 +2575,9 @@ let adjustTimeCtx = {
 
 // 颜色配置
 const levelConfig = {
-  red:    { label: '重要', color: '#ff4d4f', emoji: '🔴', bg: 'bg-red'    },
-  yellow: { label: '一般', color: '#c49900', emoji: '🟡', bg: 'bg-yellow' },
-  green:  { label: '轻松', color: '#52c41a', emoji: '🟢', bg: 'bg-green'  },
+  red:    { label: 'Important', color: '#ef4444', emoji: '🔴', bg: 'bg-red'    },
+  yellow: { label: 'Normal',    color: '#f59e0b', emoji: '🟡', bg: 'bg-yellow' },
+  green:  { label: 'Easy',      color: '#22c55e', emoji: '🟢', bg: 'bg-green'  },
 };
 
 // 小时选项列表（30分钟步进）
@@ -1504,26 +2604,26 @@ const DURATION_OPTIONS = [
 
 // 每日励志语
 const DAILY_QUOTES = [
-  '今天也往前走一点点就很好了 🌱',
-  '慢一点没关系，但不要停 🌿',
-  '你正在变成你想成为的人 ✨',
-  '完成一件小事，就是胜利 🎯',
-  '保持节奏，比拼命更重要 🎵',
-  '再坚持一下，你就会看到变化 🌅',
-  '专注当下，就是最好的状态 🧘',
-  '每一步都算数，哪怕很小 👣',
-  '不必完美，做了就是进步 💪',
-  '今天的努力，是明天的底气 🌟',
-  '给自己一点耐心，你值得被温柔对待 🌸',
-  '休息也是努力的一部分 ☕',
-  '好好生活，本身就是一件大事 🏡',
-  '不是每天都要很厉害，存在本身就有意义 💫',
-  '照顾好自己，才能走得更远 🌈',
-  '你比想象中更有韧性 🌊',
-  '今天种下的每一粒种子，都会发芽 🌻',
-  '允许自己有起伏，这才是真实的人生 🎭',
-  '往前看，但也要感谢今天的自己 🤗',
-  '一件事一件事来，不慌 🕊️',
+  'A small step forward still counts 🌱',
+  'Slow is fine — just do not stop 🌿',
+  'You are becoming who you want to be ✨',
+  'One tiny finish is still a win 🎯',
+  'Steady rhythm beats burnout 🎵',
+  'Keep going — change shows up 🌅',
+  'Being present is enough 🧘',
+  'Every step matters 👣',
+  'Done beats perfect 💪',
+  'Today’s effort is tomorrow’s calm 🌟',
+  'Be patient with yourself 🌸',
+  'Rest is part of the work ☕',
+  'Showing up is meaningful 🏡',
+  'You do not have to be intense every day 💫',
+  'Care for yourself on the way 🌈',
+  'You are more resilient than you think 🌊',
+  'Seeds you plant will grow 🌻',
+  'Ups and downs are human 🎭',
+  'Thank yourself for today 🤗',
+  'One thing at a time 🕊️',
 ];
 
 function initDailyQuote() {
@@ -1541,17 +2641,17 @@ function init() {
   buildHourSelects();
   initDailyQuote();
 
-  // 默认示例数据
+  // Default demo data (overwritten when localStorage loads)
   mainTasks = [
-    { id: nextId++, name: 'CSC学习',  level: 'red',    note: '英语+专业课', done: false, totalHours: 50, doneHours: 3  },
-    { id: nextId++, name: '读书计划', level: 'yellow', note: '每月4本书',   done: false, totalHours: 30, doneHours: 0  },
-    { id: nextId++, name: '健身',     level: 'green',  note: '每周3次',     done: false, totalHours: 15, doneHours: 0  },
+    { id: nextId++, name: 'Language study', level: 'red',    note: 'Reading + vocab', done: false, totalHours: 50, doneHours: 3  },
+    { id: nextId++, name: 'Reading list',   level: 'yellow', note: '4 books / month', done: false, totalHours: 30, doneHours: 0  },
+    { id: nextId++, name: 'Fitness',        level: 'green',  note: '3× per week',     done: false, totalHours: 15, doneHours: 0  },
   ];
   calTasks = [
-    { id: nextId++, name: 'CSC词汇',   level: 'red',    note: '', done: false, year: currentYear, month: currentMonth, day: 18, startHour: 8,  duration: 3, mainTaskId: mainTasks[0].id, subtasks: [] },
-    { id: nextId++, name: '读书笔记',  level: 'yellow', note: '', done: false, year: currentYear, month: currentMonth, day: 21, startHour: 9,  duration: 1, mainTaskId: mainTasks[1].id, subtasks: [] },
-    { id: nextId++, name: '健身-跑步', level: 'green',  note: '', done: false, year: currentYear, month: currentMonth, day: 22, startHour: 7,  duration: 1, mainTaskId: mainTasks[2].id, subtasks: [] },
-    { id: nextId++, name: 'CSC阅读',   level: 'red',    note: '', done: false, year: currentYear, month: currentMonth, day: 28, startHour: 10, duration: 2, mainTaskId: mainTasks[0].id, subtasks: [] },
+    { id: nextId++, name: 'Vocab session', level: 'red',    note: '', done: false, year: currentYear, month: currentMonth, day: 18, startHour: 8,  duration: 3, mainTaskId: mainTasks[0].id, subtasks: [] },
+    { id: nextId++, name: 'Reading notes', level: 'yellow', note: '', done: false, year: currentYear, month: currentMonth, day: 21, startHour: 9,  duration: 1, mainTaskId: mainTasks[1].id, subtasks: [] },
+    { id: nextId++, name: 'Run',           level: 'green',  note: '', done: false, year: currentYear, month: currentMonth, day: 22, startHour: 7,  duration: 1, mainTaskId: mainTasks[2].id, subtasks: [] },
+    { id: nextId++, name: 'Reading block', level: 'red',    note: '', done: false, year: currentYear, month: currentMonth, day: 28, startHour: 10, duration: 2, mainTaskId: mainTasks[0].id, subtasks: [] },
   ];
 
   render();
@@ -1595,27 +2695,232 @@ function render() {
 // ==================== 渲染主界面任务池 ====================
 function renderMainPool() {
   const el = document.getElementById('mainPoolList');
-  const cnt = document.getElementById('poolCount');
+  const lbl = document.getElementById('poolCountLabel');
   if (!el) return;
-  if (cnt) cnt.textContent = taskPool.length ? `${taskPool.length}项` : '';
+
+  // Backward-compatible normalization (preserve calendar_v4 shape)
+  taskPool.forEach(p => {
+    if (!p.level) p.level = 'yellow';
+    if (p.note == null) p.note = '';
+    if (!Array.isArray(p.subtasks)) p.subtasks = [];
+  });
+
+  const counts = { all: taskPool.length, red: 0, yellow: 0, green: 0 };
+  taskPool.forEach(p => {
+    const lv = p.level || 'yellow';
+    if (counts[lv] !== undefined) counts[lv]++;
+  });
+  const ta = document.getElementById('tabCountAll');
+  const tr = document.getElementById('tabCountRed');
+  const ty = document.getElementById('tabCountYellow');
+  const tg = document.getElementById('tabCountGreen');
+  if (ta) ta.textContent = String(counts.all);
+  if (tr) tr.textContent = String(counts.red);
+  if (ty) ty.textContent = String(counts.yellow);
+  if (tg) tg.textContent = String(counts.green);
+
+  if (lbl) lbl.textContent = taskPool.length ? `(${taskPool.length})` : '';
+
   if (!taskPool.length) {
-    el.innerHTML = '<div class="pool-empty">无待安排任务</div>';
+    el.innerHTML = '<div class="pool-empty-state"><div class="pool-empty-state-icon">📥</div>No tasks in the pool.<br/>Quick-add above or drag tasks back from the calendar.</div>';
     return;
   }
-  el.innerHTML = taskPool.map(p => {
-    const levelClass = `level-${p.level || 'yellow'}`;
-    return `<div class="pool-item ${levelClass}" data-pool-id="${p.id}">
-      <span class="pool-item-name">${escHtml(p.name)}</span>
-      <span class="pool-item-del" onclick="deletePoolTask(${p.id})" title="删除">×</span>
+
+  const filtered = poolFilterLevel === 'all'
+    ? taskPool.slice()
+    : taskPool.filter(p => (p.level || 'yellow') === poolFilterLevel);
+
+  if (!filtered.length) {
+    el.innerHTML = '<div class="pool-empty-state"><div class="pool-empty-state-icon">🔎</div>No tasks match this filter.<br/>Try another tab.</div>';
+    return;
+  }
+  el.innerHTML = filtered.map(p => {
+    const level = p.level || 'yellow';
+    const levelClass = `level-${level}`;
+    const badgeClass = level === 'red' ? 'badge-important' : level === 'green' ? 'badge-easy' : 'badge-normal';
+    const badgeText  = level === 'red' ? 'Important' : level === 'green' ? 'Easy' : 'Normal';
+    const mt = p.mainTaskId ? mainTasks.find(t => t.id === p.mainTaskId) : null;
+    const goalHtml = mt ? `<div class="pool-item-goal">🎯 ${escHtml(mt.name)}</div>` : '';
+    const subCount = Array.isArray(p.subtasks) ? p.subtasks.length : 0;
+    const subHtml  = subCount > 0 ? `<div class="pool-item-subcount">${subCount} subtask${subCount === 1 ? '' : 's'}</div>` : '';
+    return `<div class="pool-item ${levelClass}" data-pool-id="${p.id}" draggable="true"
+      ondragstart="onPoolTaskDragStart(event, ${p.id})" ondragend="onDragEnd(event)"
+      onclick="openPoolDetailModal(${p.id})">
+      <div class="pool-item-body">
+        <div class="pool-item-name">${escHtml(p.name)}</div>
+        ${subHtml}
+        ${goalHtml}
+      </div>
+      <span class="pool-item-badge ${badgeClass}">${badgeText}</span>
+      <span class="pool-item-del" onclick="event.stopPropagation();deletePoolTask(${p.id})" title="Remove">×</span>
     </div>`;
   }).join('');
+}
+
+function filterPoolTab(level, btn) {
+  poolFilterLevel = level;
+  document.querySelectorAll('.pool-filter-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderMainPool();
+}
+
+function quickAddPoolTask() {
+  const inp = document.getElementById('quickAddInput');
+  const name = inp && inp.value.trim();
+  if (!name) return;
+  taskPool.push({ id: nextId++, name, level: 'yellow', note: '', mainTaskId: null, subtasks: [] });
+  inp.value = '';
+  renderMainPool();
+  if (document.getElementById('dvPoolList')) renderDvPool();
+  saveData();
+}
+
+// ==================== Task Pool Detail Modal ====================
+let poolDetailCtx = { id: null };
+let poolDetailSubtasks = [];
+
+function openPoolDetailModal(id) {
+  poolDetailCtx = { id: id == null ? null : Number(id) };
+
+  const title = document.getElementById('poolDetailTitle');
+  const nameEl = document.getElementById('poolDetailName');
+  const lvlEl  = document.getElementById('poolDetailLevel');
+  const goalEl = document.getElementById('poolDetailGoal');
+  const noteEl = document.getElementById('poolDetailNote');
+  const delRow = document.getElementById('poolDetailDeleteRow');
+
+  // Populate goal dropdown
+  goalEl.innerHTML = '<option value="">— No goal linked —</option>' +
+    mainTasks.map(t => `<option value="${t.id}">${escHtml(t.name)}</option>`).join('');
+
+  if (poolDetailCtx.id == null) {
+    if (title) title.textContent = 'New pool task';
+    nameEl.value = '';
+    lvlEl.value = 'yellow';
+    goalEl.value = '';
+    noteEl.value = '';
+    poolDetailSubtasks = [];
+    if (delRow) delRow.style.display = 'none';
+  } else {
+    const p = taskPool.find(x => x.id === poolDetailCtx.id);
+    if (!p) { showToast('Pool task not found', '#ef4444'); return; }
+    if (title) title.textContent = 'Edit pool task';
+    nameEl.value = p.name || '';
+    lvlEl.value = p.level || 'yellow';
+    goalEl.value = p.mainTaskId ? String(p.mainTaskId) : '';
+    noteEl.value = p.note || '';
+
+    // Backward compatible subtasks: accept strings or objects
+    const rawSubs = Array.isArray(p.subtasks) ? p.subtasks : [];
+    poolDetailSubtasks = rawSubs.map(s => {
+      if (typeof s === 'string') return { id: nextId++, name: s, done: false };
+      return { id: s.id != null ? s.id : nextId++, name: s.name || '', done: !!s.done };
+    }).filter(s => (s.name || '').trim().length > 0);
+
+    if (delRow) delRow.style.display = 'flex';
+  }
+
+  renderPoolDetailSubtasks();
+  document.getElementById('poolDetailOverlay').classList.add('show');
+  setTimeout(() => nameEl && nameEl.focus(), 0);
+}
+
+function closePoolDetailModal() {
+  document.getElementById('poolDetailOverlay').classList.remove('show');
+  poolDetailCtx = { id: null };
+  poolDetailSubtasks = [];
+}
+
+function renderPoolDetailSubtasks() {
+  const el = document.getElementById('poolDetailSubList');
+  if (!el) return;
+  if (!poolDetailSubtasks.length) {
+    el.innerHTML = '<div style="font-size:11px;color:#bbb;padding:4px 0;">No subtasks</div>';
+    return;
+  }
+  el.innerHTML = poolDetailSubtasks.map((s, idx) => `
+    <div class="pool-detail-sub-item ${s.done ? 'done' : ''}">
+      <div class="pool-detail-sub-check" onclick="togglePoolDetailSubtask(${idx})">${s.done ? '✓' : ''}</div>
+      <div class="pool-detail-sub-name" title="${escHtml(s.name)}">${escHtml(s.name)}</div>
+      <div class="pool-detail-sub-del" onclick="removePoolDetailSubtask(${idx})">×</div>
+    </div>
+  `).join('');
+}
+
+function addPoolDetailSubtask() {
+  const inp = document.getElementById('poolDetailSubInput');
+  const text = inp ? inp.value.trim() : '';
+  if (!text) return;
+  poolDetailSubtasks.push({ id: nextId++, name: text, done: false });
+  inp.value = '';
+  renderPoolDetailSubtasks();
+  inp.focus();
+}
+
+function removePoolDetailSubtask(idx) {
+  poolDetailSubtasks.splice(idx, 1);
+  renderPoolDetailSubtasks();
+}
+
+function togglePoolDetailSubtask(idx) {
+  const s = poolDetailSubtasks[idx];
+  if (!s) return;
+  s.done = !s.done;
+  renderPoolDetailSubtasks();
+}
+
+function savePoolDetailModal() {
+  const name = document.getElementById('poolDetailName').value.trim();
+  if (!name) { alert('Please enter a task name'); return; }
+  const level = document.getElementById('poolDetailLevel').value || 'yellow';
+  const goalVal = document.getElementById('poolDetailGoal').value;
+  const mainTaskId = goalVal ? Number(goalVal) : null;
+  const note = document.getElementById('poolDetailNote').value || '';
+  const subtasks = poolDetailSubtasks.map(s => ({ id: s.id, name: s.name, done: !!s.done }));
+
+  if (poolDetailCtx.id == null) {
+    taskPool.push({ id: nextId++, name, level, note, mainTaskId, subtasks });
+  } else {
+    const p = taskPool.find(x => x.id === poolDetailCtx.id);
+    if (!p) { showToast('Pool task not found', '#ef4444'); return; }
+    p.name = name;
+    p.level = level;
+    p.mainTaskId = mainTaskId;
+    p.note = note;
+    p.subtasks = subtasks;
+  }
+
+  closePoolDetailModal();
+  renderMainPool();
+  if (document.getElementById('dvPoolList')) renderDvPool();
+  saveData();
+}
+
+function deletePoolDetailModal() {
+  if (poolDetailCtx.id == null) return;
+  const p = taskPool.find(x => x.id === poolDetailCtx.id);
+  if (!p) { closePoolDetailModal(); return; }
+  if (!confirm(`Delete "${p.name}"?\nThis cannot be undone.`)) return;
+  taskPool = taskPool.filter(x => x.id !== poolDetailCtx.id);
+  closePoolDetailModal();
+  renderMainPool();
+  if (document.getElementById('dvPoolList')) renderDvPool();
+  saveData();
+}
+
+function focusNewGoalForm() {
+  const n = document.getElementById('newTaskName');
+  if (n) {
+    n.focus();
+    n.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
 }
 
 function addPoolTask() {
   const name = document.getElementById('newPoolName').value.trim();
   if (!name) return;
   const level = document.getElementById('newPoolLevel').value;
-  taskPool.push({ id: nextId++, name, level, note: '', mainTaskId: null });
+  taskPool.push({ id: nextId++, name, level, note: '', mainTaskId: null, subtasks: [] });
   document.getElementById('newPoolName').value = '';
   renderMainPool();
   if (document.getElementById('dvPoolList')) renderDvPool();
@@ -1629,17 +2934,23 @@ function deletePoolTask(id) {
   saveData();
 }
 
+/** Goal card: open edit modal from body click; exclude done checkbox and delete. */
+function onGoalCardClick(e, id) {
+  if (e.target.closest('.task-check') || e.target.closest('.task-del')) return;
+  openEditPlan(id);
+}
+
 // ==================== 渲染总任务列表 ====================
 function renderMainTasks() {
   const list = document.getElementById('mainTaskList');
   if (!mainTasks.length) {
-    list.innerHTML = '<div style="text-align:center;color:#ccc;padding:30px 0;font-size:13px;">暂无 Plan，添加你的第一个目标吧～</div>';
+    list.innerHTML = '<div class="goal-empty"><div class="goal-empty-icon">🎯</div>Add your first goal with the form above.</div>';
     return;
   }
   const groups = { red: [], yellow: [], green: [] };
   mainTasks.forEach(t => groups[t.level].push(t));
 
-  const groupLabels = { red: '🔴 重要', yellow: '🟡 一般', green: '🟢 轻松' };
+  const groupLabels = { red: '🔴 Important', yellow: '🟡 Normal', green: '🟢 Easy' };
   let html = '';
   Object.entries(groups).forEach(([level, tasks]) => {
     if (!tasks.length) return;
@@ -1649,15 +2960,12 @@ function renderMainTasks() {
       const pct       = t.totalHours > 0 ? Math.min(100, (t.doneHours / t.totalHours) * 100).toFixed(1) : 0;
       const remaining = Math.max(0, (t.totalHours || 0) - (t.doneHours || 0));
       const achieved  = t.totalHours > 0 && t.doneHours >= t.totalHours;
-      // 进度文字：若已完成目标，显示"完成！🎉"
       const progressLabel = achieved
-        ? `<span style="color:#52c41a;font-weight:700">完成！🎉</span>`
+        ? `<span style="color:#22c55e;font-weight:700">Done! 🎉</span>`
         : `<span style="color:${cfg.color};font-weight:600">${t.doneHours}/${t.totalHours}h</span>`;
-      // deadline 文字
       const deadlineHtml = t.deadline
-        ? `<span style="color:#aaa;font-size:10px;margin-left:6px;">截止: ${t.deadline}</span>`
+        ? `<span style="color:#aaa;font-size:10px;margin-left:6px;">Due ${t.deadline}</span>`
         : '';
-      // planSubtasks 摘要徽章（阶段目标进度）
       const subs = Array.isArray(t.planSubtasks) ? t.planSubtasks : [];
       const subsDone = subs.filter(s => s.done).length;
       const subsBadgeHtml = subs.length > 0
@@ -1667,28 +2975,28 @@ function renderMainTasks() {
         <div class="task-item level-${level} ${t.done ? 'done' : ''}" id="mt-${t.id}"
              draggable="true"
              ondragstart="onMainTaskDragStart(event, ${t.id})"
-             ondragend="onDragEnd(event)">
+             ondragend="onDragEnd(event)"
+             onclick="onGoalCardClick(event, ${t.id})">
           <div class="task-top">
-            <div class="task-check" onclick="toggleMainDone(${t.id})" title="${t.done ? '撤回完成' : '标记完成'}"></div>
+            <div class="task-check" onclick="event.stopPropagation();toggleMainDone(${t.id})" title="${t.done ? 'Mark not done' : 'Mark done'}"></div>
             <div style="flex:1; min-width:0;">
               <div class="task-name">${escHtml(t.name)}</div>
               ${t.note ? `<div class="task-note">${escHtml(t.note)}</div>` : ''}
               ${subsBadgeHtml}
             </div>
-            <!-- 编辑按钮：铅笔图标 -->
-            <span class="task-edit-btn" onclick="openEditPlan(${t.id})" title="编辑 Plan">✏️</span>
-            <span class="task-del" onclick="deleteMain(${t.id})" title="删除 Plan">×</span>
+            <span class="task-edit-btn" onclick="event.stopPropagation();openEditPlan(${t.id})" title="Edit goal">✏️</span>
+            <span class="task-del" onclick="event.stopPropagation();deleteMain(${t.id})" title="Delete goal">×</span>
           </div>
           ${t.totalHours > 0 ? `
           <div class="progress-wrap">
             <div class="progress-meta">
               <span>${progressLabel}${deadlineHtml}</span>
-              <span>剩余 <strong>${remaining}h</strong></span>
+              <span><strong>${remaining}h</strong> left</span>
             </div>
             <div class="progress-bar-bg">
-              <div class="progress-bar-fill" style="width:${pct}%;background:${achieved ? '#52c41a' : cfg.color}"></div>
+              <div class="progress-bar-fill" style="width:${pct}%;background:${achieved ? '#22c55e' : cfg.color}"></div>
             </div>
-          </div>` : (t.deadline ? `<div style="padding-left:24px;margin-top:4px;font-size:10px;color:#aaa;">截止: ${t.deadline}</div>` : '')}
+          </div>` : (t.deadline ? `<div style="padding-left:24px;margin-top:4px;font-size:10px;color:#aaa;">Due ${t.deadline}</div>` : '')}
         </div>`;
     });
   });
@@ -1698,9 +3006,11 @@ function renderMainTasks() {
 // ==================== 渲染日历 ====================
 function renderCalendar() {
   const grid = document.getElementById('calendarGrid');
-  document.getElementById('monthTitle').textContent = `${currentYear}年${currentMonth}月`;
+  const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  document.getElementById('monthTitle').textContent = `${monthNames[currentMonth - 1]} ${currentYear}`;
 
-  const firstDay    = new Date(currentYear, currentMonth - 1, 1).getDay();
+  const firstDayJs  = new Date(currentYear, currentMonth - 1, 1).getDay(); // 0=Sun … 6=Sat
+  const leadingBlanks = (firstDayJs + 6) % 7; // Monday-first grid
   const daysInMonth = new Date(currentYear, currentMonth, 0).getDate();
   const today       = new Date();
 
@@ -1712,7 +3022,7 @@ function renderCalendar() {
   });
 
   let html = '';
-  for (let i = 0; i < firstDay; i++) html += '<div class="day-cell empty"></div>';
+  for (let i = 0; i < leadingBlanks; i++) html += '<div class="day-cell empty"></div>';
 
   for (let d = 1; d <= daysInMonth; d++) {
     const dow = new Date(currentYear, currentMonth - 1, d).getDay();
@@ -1748,10 +3058,9 @@ function renderCalendar() {
       summaryHtml = '<div class="day-summary-empty">—</div>';
     }
 
-    // 日期头部：全部完成时显示特殊标记
     const dayHeaderExtra = allDone
-      ? `<span class="day-all-done">ALL DONE! 😄</span>`
-      : `<span class="day-open-btn">查看 ›</span>`;
+      ? `<span class="day-all-done">All done! 😄</span>`
+      : `<span class="day-open-btn">Open ›</span>`;
 
     html += `
       <div class="day-cell ${isWeekend ? 'weekend-day' : ''} ${isToday ? 'today' : ''} ${allDone ? 'day-all-done-cell' : ''}"
@@ -1764,7 +3073,7 @@ function renderCalendar() {
         <div class="day-header">
           <div class="day-number">${d}</div>
           ${dayHeaderExtra}
-          <button class="day-add-btn" onclick="event.stopPropagation(); openModal('${dateStr}')" title="添加日程">+</button>
+          <button class="day-add-btn" onclick="event.stopPropagation(); openModal('${dateStr}')" title="Add schedule">+</button>
         </div>
         <div class="day-summary">${summaryHtml}</div>
       </div>`;
@@ -1777,29 +3086,109 @@ function renderCalendar() {
 const HOUR_H = 80;
 const HALF_H = HOUR_H / 2; // 每30分钟高度
 
-// ==================== 渲染统计条 ====================
+// ==================== 渲染统计条（顶部 KPI，对齐 Claude patch / part1 IDs） ====================
 function renderStats() {
-  const bar = document.getElementById('statsBar');
-  const counts = { red: 0, yellow: 0, green: 0 };
-  const doneCounts = { red: 0, yellow: 0, green: 0 };
-  calTasks.forEach(t => {
-    if (t.year === currentYear && t.month === currentMonth) {
-      counts[t.level]++;
-      if (t.done) doneCounts[t.level]++;
-    }
+  const monthTasks = calTasks.filter(
+    t => t.year === currentYear && t.month === currentMonth
+  );
+  const total   = monthTasks.length;
+  const done    = monthTasks.filter(t => t.done).length;
+  const pending = total - done;
+  const pct     = total > 0 ? Math.round(done / total * 100) : 0;
+
+  const byLvl = { red: 0, yellow: 0, green: 0 };
+  monthTasks.forEach(t => {
+    const lv = t.level || 'yellow';
+    if (byLvl[lv] !== undefined) byLvl[lv]++;
   });
-  const total     = Object.values(counts).reduce((a,b) => a+b, 0);
-  const totalDone = Object.values(doneCounts).reduce((a,b) => a+b, 0);
-  let html = `
-    <div class="stat-item"><strong>本月日程：${total} 项</strong></div>
-    <div class="stat-item" style="color:#52c41a">✓ 已完成：${totalDone}</div>
-    <div class="stat-item" style="color:#ff4d4f">● 待完成：${total - totalDone}</div>`;
-  Object.entries(levelConfig).forEach(([level, cfg]) => {
-    if (counts[level] > 0) {
-      html += `<div class="stat-item"><div class="stat-dot" style="background:${cfg.color}"></div>${cfg.emoji} ${cfg.label}：${doneCounts[level]}/${counts[level]}</div>`;
-    }
-  });
-  bar.innerHTML = html;
+
+  const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const hm = document.getElementById('hstatMonth');
+  if (hm) hm.textContent = `${monthNames[currentMonth - 1]} ${currentYear}`;
+
+  const setH = (id, inner) => { const e = document.getElementById(id); if (e) e.innerHTML = inner; };
+  const setT = (id, txt) => { const e = document.getElementById(id); if (e) e.textContent = txt; };
+
+  setH('hstatTotal', `${total} <span class="hstat-arr">›</span>`);
+  setH('hstatDone', `${done} <span class="hstat-arr">›</span>`);
+  setH('hstatPending', `${pending} <span class="hstat-arr">›</span>`);
+  setH('hstatRate', `${pct}% <span class="hstat-arr">›</span>`);
+  setT('hstatRed', byLvl.red);
+  setT('hstatYellow', byLvl.yellow);
+  setT('hstatGreen', byLvl.green);
+}
+
+// ==================== Monthly Review ====================
+function getMonthTasksForReview() {
+  return calTasks.filter(t => t.year === currentYear && t.month === currentMonth);
+}
+
+function formatReviewHours(h) {
+  const n = Number(h) || 0;
+  if (n <= 0) return '0h';
+  const rounded = Math.round(n * 10) / 10;
+  return (rounded % 1 === 0 ? String(rounded) : rounded.toFixed(1)) + 'h';
+}
+
+function openMonthReview() {
+  const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  const period = `${monthNames[currentMonth - 1]} ${currentYear}`;
+  const tasks = getMonthTasksForReview();
+  const total = tasks.length;
+  const completedArr = tasks.filter(t => t.done);
+  const doneCount = completedArr.length;
+  const rate = total > 0 ? Math.round((doneCount / total) * 100) : 0;
+  const focusedHours = completedArr.reduce((sum, t) => sum + (parseFloat(t.duration) || 0), 0);
+  const activeGoals = mainTasks.filter(g => !g.done).length;
+
+  const periodEl = document.getElementById('reviewMonthPeriod');
+  if (periodEl) periodEl.textContent = `Monthly Review · ${period}`;
+
+  let headline = 'Your month at a glance';
+  let subline = 'Take a breath — progress counts in small steps.';
+  if (total === 0) {
+    headline = 'A quiet month on the calendar';
+    subline = 'Whenever you add tasks, this space will celebrate what you finish.';
+  } else if (rate >= 75) {
+    headline = 'You followed through beautifully';
+    subline = 'Most of what you scheduled got done — that takes steady care.';
+  } else if (rate >= 40) {
+    headline = 'You kept momentum going';
+    subline = 'Some tasks are still open — that is normal for real life.';
+  } else if (doneCount > 0) {
+    headline = 'Every finish line matters';
+    subline = 'Even a few completions move you forward — kindness helps here.';
+  } else {
+    headline = 'Be gentle with this chapter';
+    subline = 'Nothing marked done yet — you can reschedule or trim what feels heavy.';
+  }
+
+  document.getElementById('reviewHeadline').textContent = headline;
+  document.getElementById('reviewSubline').textContent = subline;
+
+  document.getElementById('reviewKpiCompleted').textContent = String(doneCount);
+  document.getElementById('reviewKpiTotal').textContent = String(total);
+  document.getElementById('reviewKpiRate').textContent = `${rate}%`;
+  document.getElementById('reviewKpiHours').textContent = formatReviewHours(focusedHours);
+  document.getElementById('reviewKpiGoals').textContent = String(activeGoals);
+
+  const nar = document.getElementById('reviewNarrative');
+  const hStr = formatReviewHours(focusedHours);
+  if (total === 0) {
+    nar.innerHTML = '<p>This month has no scheduled calendar tasks yet. When you\'re ready, add a few gentle blocks — they\'ll show up here.</p>';
+  } else {
+    nar.innerHTML =
+      `<p>You completed <strong>${doneCount}</strong> of <strong>${total}</strong> scheduled tasks this month (${rate}% completion rate).</p>` +
+      `<p>Focused time on finished tasks adds up to about <strong>${hStr}</strong> — time you chose on purpose.</p>` +
+      `<p>You have <strong>${activeGoals}</strong> active goals. They can grow alongside your calendar — no rush.</p>`;
+  }
+
+  document.getElementById('reviewOverlay').classList.add('show');
+}
+
+function closeMonthReview() {
+  const el = document.getElementById('reviewOverlay');
+  if (el) el.classList.remove('show');
 }
 
 // ==================== 通用拖拽排序引擎 ====================
@@ -1923,7 +3312,7 @@ function renderEditPlanSubList() {
   const el = document.getElementById('editPlanSubList');
   if (!el || !t) return;
   const subs = Array.isArray(t.planSubtasks) ? t.planSubtasks : [];
-  if (!subs.length) { el.innerHTML = '<div style="font-size:11px;color:#bbb;padding:2px 0;">暂无阶段目标</div>'; return; }
+  if (!subs.length) { el.innerHTML = '<div style="font-size:11px;color:#bbb;padding:2px 0;">No milestones yet</div>'; return; }
   el.innerHTML = subs.map((s, i) => `
     <div class="plan-sub-item ${s.done ? 'done' : ''}" data-sort-idx="${i}">
       <span class="drag-handle">⠿</span>
@@ -2021,7 +3410,7 @@ function removePoolFormSub(idx) {
 // ==================== 总任务区操作 ====================
 function addMainTask() {
   const name = document.getElementById('newTaskName').value.trim();
-  if (!name) { alert('请输入 Plan 名称'); return; }
+  if (!name) { alert('Please enter a goal name'); return; }
   const level      = document.getElementById('newTaskLevel').value;
   const note       = document.getElementById('newTaskNote').value.trim();
   const totalHours = parseFloat(document.getElementById('newTaskTotalHours').value) || 0;
@@ -2044,9 +3433,14 @@ function addMainTask() {
 }
 
 function deleteMain(id) {
-  if (!confirm('删除该任务？相关日历日程也会一并删除。')) return;
+  if (!confirm('Delete this goal? Related tasks will stay, but they will no longer be linked to this goal.')) return;
   mainTasks = mainTasks.filter(t => t.id !== id);
-  calTasks  = calTasks.filter(c => c.mainTaskId !== id);
+  calTasks.forEach(c => {
+    if (c.mainTaskId === id || c.mainTaskId == id) c.mainTaskId = null;
+  });
+  taskPool.forEach(p => {
+    if (p.mainTaskId === id || p.mainTaskId == id) p.mainTaskId = null;
+  });
   render(); saveData();
 }
 
@@ -2100,7 +3494,7 @@ function confirmEditPlan() {
   if (!t) { closeEditPlan(); return; }
 
   const name = document.getElementById('editPlanName').value.trim();
-  if (!name) { alert('请输入 Plan 名称'); return; }
+  if (!name) { alert('Please enter a goal name'); return; }
 
   const newTotalHours = parseFloat(document.getElementById('editPlanTotalHours').value) || 0;
   const newLevel      = document.getElementById('editPlanLevel').value;
@@ -2122,7 +3516,7 @@ function confirmEditPlan() {
   closeEditPlan();
   renderMainTasks();
   saveData();
-  showToast(`✏️ Plan「${name}」已更新`, '#667eea');
+  showToast(`✏️ Goal "${name}" updated`, '#667eea');
 }
 
 function toggleMainDone(id) {
@@ -2144,7 +3538,7 @@ function onTaskClick(id) {
   document.getElementById('progTaskName').textContent = `📝 ${t.name}`;
   const mt = t.mainTaskId ? mainTasks.find(m => m.id === t.mainTaskId) : null;
   document.getElementById('progInfo').innerHTML = `
-    <div>📅 ${t.year}年${t.month}月${t.day}日</div>
+    <div>📅 ${t.month}/${t.day}/${t.year}</div>
     <div>⏱ 时长：<strong>${durLabel}</strong></div>
     ${mt && mt.totalHours > 0 ? `
       <div style="margin-top:6px;padding:8px;background:#f7f8fa;border-radius:8px;">
@@ -2189,7 +3583,7 @@ function confirmProgress() {
   // Plan 达标庆祝
   if (justAchieved) {
     setTimeout(() => {
-      showToast(`🎉 恭喜！Plan「${achievedPlanName}」目标达成！`, '#52c41a');
+      showToast(`🎉 Goal "${achievedPlanName}" complete!`, '#52c41a');
     }, 300);
   }
 }
@@ -2226,15 +3620,16 @@ let currentDayViewDate = null;
 function openDayView(day) {
   currentDayViewDate = `${currentYear}-${String(currentMonth).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
   const [y, m, d] = currentDayViewDate.split('-').map(Number);
-  document.getElementById('dayviewTitle').textContent = `${y}年${m}月${d}日`;
+  const monthNamesEn = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  document.getElementById('dayviewTitle').textContent = `${monthNamesEn[m - 1]} ${d}, ${y}`;
 
   const dayTasks = calTasks.filter(t => t.year === y && t.month === m && t.day === d);
   const doneCount = dayTasks.filter(t => t.done).length;
   const total     = dayTasks.length;
   document.getElementById('dayviewStat').innerHTML =
-    total === 0 ? '暂无日程' :
-    doneCount === total ? `✓ ${doneCount} / ${total} 全部完成 🎉` :
-    `待完成 ${total - doneCount} / ${total}`;
+    total === 0 ? 'No tasks yet' :
+    doneCount === total ? `✓ ${doneCount} / ${total} all done 🎉` :
+    `${total - doneCount} pending / ${total}`;
 
   const sorted = [...dayTasks].sort((a, b) => (a.startHour || 0) - (b.startHour || 0));
   let minH = 7, maxH = 22;
@@ -2341,7 +3736,7 @@ function dvComplete(id) {
   document.getElementById('progTaskName').textContent = `📝 ${t.name}`;
   const mt = t.mainTaskId ? mainTasks.find(m => m.id === t.mainTaskId) : null;
   document.getElementById('progInfo').innerHTML = `
-    <div>📅 ${t.year}年${t.month}月${t.day}日</div>
+    <div>📅 ${t.month}/${t.day}/${t.year}</div>
     <div>⏱ 时长：<strong>${durLabel}</strong></div>
     ${mt && mt.totalHours > 0 ? `<div style="margin-top:6px;padding:8px;background:#f7f8fa;border-radius:8px;">
       🎯 关联目标：<strong>${escHtml(mt.name)}</strong><br>
@@ -2453,15 +3848,15 @@ function confirmCopyDay() {
   if (!currentDayViewDate) return;
 
   const targetDateStr = document.getElementById('copyDayTarget').value;
-  if (!targetDateStr) { alert('请选择目标日期'); return; }
-  if (targetDateStr === currentDayViewDate) { alert('目标日期与当前日期相同，请选择不同的日期'); return; }
+  if (!targetDateStr) { alert('Pick a target date'); return; }
+  if (targetDateStr === currentDayViewDate) { alert('Choose a different date than today'); return; }
 
   const [sy, sm, sd] = currentDayViewDate.split('-').map(Number);
   const [ty, tm, td] = targetDateStr.split('-').map(Number);
 
   // 当天任务（来源）
   const srcTasks = calTasks.filter(t => t.year === sy && t.month === sm && t.day === sd);
-  if (srcTasks.length === 0) { alert('当天没有任务可复制'); closeCopyDayModal(); return; }
+  if (srcTasks.length === 0) { alert('No tasks on this day to copy'); closeCopyDayModal(); return; }
 
   // 目标日期已有任务
   const dstTasks = calTasks.filter(t => t.year === ty && t.month === tm && t.day === td);
@@ -2476,14 +3871,14 @@ function confirmCopyDay() {
       const dstEnd   = dstStart + (parseFloat(dst.duration) || 1);
       // 重叠判断
       if (Math.max(srcStart, dstStart) < Math.min(srcEnd, dstEnd)) {
-        conflicts.push(`"${src.name}" (${_fmtHour(srcStart)}-${_fmtHour(srcEnd)}) 与已有 "${dst.name}" (${_fmtHour(dstStart)}-${_fmtHour(dstEnd)}) 冲突`);
+        conflicts.push(`"${src.name}" (${_fmtHour(srcStart)}-${_fmtHour(srcEnd)}) overlaps "${dst.name}" (${_fmtHour(dstStart)}-${_fmtHour(dstEnd)})`);
         break;
       }
     }
   }
 
   if (conflicts.length > 0) {
-    alert(`目标日期中存在时间冲突，请调整后再复制：\n\n${conflicts.join('\n')}`);
+    alert(`Time conflicts on target date — adjust and try again:\n\n${conflicts.join('\n')}`);
     return;
   }
 
@@ -2506,7 +3901,7 @@ function confirmCopyDay() {
   render();
 
   closeCopyDayModal();
-  alert(`✓ 已成功复制 ${newTasks.length} 个任务到 ${ty}年${tm}月${td}日`);
+  alert(`✓ Copied ${newTasks.length} task(s) to ${tm}/${td}/${ty}`);
 }
 
 /** 内部工具：把小时数格式化为 HH:MM */
@@ -2718,7 +4113,7 @@ function openTaskDetail(id) {
   currentDetailTaskId = numId;
   const t = calTasks.find(task => task.id === numId);
   if (!t) {
-    alert('任务不存在！');
+    alert('Task not found.');
     return;
   }
 
@@ -2744,7 +4139,7 @@ function openTaskDetail(id) {
 
   // 填充元信息
   elMeta.innerHTML = `
-    <div>📅 ${t.year}年${t.month}月${t.day}日</div>
+    <div>📅 ${t.month}/${t.day}/${t.year}</div>
     <div>⏱ 时长：<strong>${durLabel}</strong></div>
     ${t.note ? `<div style="margin-top:4px;font-size:12px;color:#aaa">备注：${escHtml(t.note)}</div>` : ''}
   `;
@@ -2755,7 +4150,7 @@ function openTaskDetail(id) {
 
   if (subs.length === 0) {
     elSubCnt.textContent = '0 / 0';
-    elSubList.innerHTML = '<div style="text-align:center;color:#bbb;padding:12px;font-size:13px;">暂无子任务，可通过下方添加</div>';
+    elSubList.innerHTML = '<div style="text-align:center;color:#bbb;padding:12px;font-size:13px;">No subtasks yet — add below</div>';
   } else {
     elSubCnt.textContent = `${doneCount} / ${subs.length}`;
     elSubList.innerHTML = subs.map(s => `
@@ -2895,7 +4290,7 @@ function updateTdEditOccupiedHint() {
   const conflictTask = checkTimeConflict30(dateStr, startH, endH, currentDetailTaskId);
   if (conflictTask) {
     const fmt = v => { const h=Math.floor(v),m=v%1===0?'00':'30'; return `${String(h).padStart(2,'0')}:${m}`; };
-    hint.textContent = `⛔ 该时间段已被「${conflictTask.name}」占用（${fmt(conflictTask.startHour)} - ${fmt(conflictTask.startHour + parseFloat(conflictTask.duration))}）`;
+    hint.textContent = `⛔ Slot taken by "${conflictTask.name}" (${fmt(conflictTask.startHour)} - ${fmt(conflictTask.startHour + parseFloat(conflictTask.duration))})`;
     hint.classList.add('show');
   } else {
     hint.classList.remove('show');
@@ -2917,12 +4312,12 @@ function confirmTdEdit() {
   const endH   = startH + dur;
 
   if (!dateStr) {
-    alert('请选择日期');
+    alert('Pick a date');
     return;
   }
 
   if (dur <= 0) {
-    alert('请选择有效时长');
+    alert('Choose a valid duration');
     return;
   }
 
@@ -2930,7 +4325,7 @@ function confirmTdEdit() {
   const fmt = v => { const h=Math.floor(v),m=v%1===0?'00':'30'; return `${String(h).padStart(2,'0')}:${m}`; };
   const conflictTask = checkTimeConflict30(dateStr, startH, endH, currentDetailTaskId);
   if (conflictTask) {
-    alert(`❌ 该时间段已被「${conflictTask.name}」占用\n（${fmt(conflictTask.startHour)} - ${fmt(conflictTask.startHour + parseFloat(conflictTask.duration))}）\n\n请调整后再保存。`);
+    alert(`❌ Slot taken by "${conflictTask.name}"\n(${fmt(conflictTask.startHour)} - ${fmt(conflictTask.startHour + parseFloat(conflictTask.duration))})\n\nPick another time.`);
     return;
   }
 
@@ -2989,7 +4384,7 @@ function renderSubtaskList(t) {
 
   if (subs.length === 0) {
     document.getElementById('tdSubCount').textContent = '0 / 0';
-    listEl.innerHTML = '<div style="text-align:center;color:#bbb;padding:12px;font-size:13px;">暂无子任务，可通过下方添加</div>';
+    listEl.innerHTML = '<div style="text-align:center;color:#bbb;padding:12px;font-size:13px;">No subtasks yet — add below</div>';
     return;
   }
 
@@ -3164,7 +4559,7 @@ function openModal(dateStr, presetHour) {
   document.getElementById('modalStartHour').value = defaultHour;
   document.getElementById('modalEndHour').value   = 1;
   document.getElementById('modalLevel').value     = 'yellow';
-  document.getElementById('modalTitle').textContent = dateStr ? `添加日程 — ${dateStr}` : '添加日程';
+  document.getElementById('modalTitle').textContent = dateStr ? `Add schedule — ${dateStr}` : 'Add schedule';
   // 清空绑定Plan选择器
   const planSel = document.getElementById('modalPlanId');
   if (planSel) {
@@ -3220,13 +4615,13 @@ function updateTimeSelectorAvailability() {
   const endVal   = startVal + durVal;
   const conflictTask = checkTimeConflict30(modalEditDate, startVal, endVal);
   if (conflictTask) {
-    hint.innerHTML = `⛔ 与「${escHtml(conflictTask.name)}」时间冲突`;
+    hint.innerHTML = `⛔ Overlaps "${escHtml(conflictTask.name)}"`;
   } else if (occupied.size > 0) {
     const list = Array.from(occupied).sort((a,b)=>a-b).map(v => {
       const h = Math.floor(v); const m = v % 1 === 0 ? '00' : '30';
       return `${String(h).padStart(2,'0')}:${m}`;
     }).join('、');
-    hint.innerHTML = `⛔ 已占用：${list}`;
+    hint.innerHTML = `⛔ Busy: ${list}`;
   } else {
     hint.innerHTML = '';
   }
@@ -3241,6 +4636,8 @@ function onModalDateChange() {
 function closeModal() {
   document.getElementById('modalOverlay').classList.remove('show');
   modalEditDate = null;
+  // Clear any Task Pool → month-drop scheduling context
+  if (typeof modalFromPoolCtx !== 'undefined' && modalFromPoolCtx) modalFromPoolCtx.poolId = null;
 }
 
 // ==================== 调整时间弹窗 ====================
@@ -3261,9 +4658,9 @@ function showAdjustTimeModal(taskId, targetDate, dragSource) {
   const endH = startH + dur;
 
   const dateParts = targetDate.split('-').map(Number);
-  const dateLabel = `${dateParts[0]}年${dateParts[1]}月${dateParts[2]}日`;
+  const dateLabel = `${dateParts[1]}/${dateParts[2]}/${dateParts[0]}`;
   document.getElementById('adjMessage').innerHTML =
-    `「${escHtml(t.name)}」移动到 <strong>${dateLabel}</strong> 时，该时间段已被占用。<br>请调整新的时间：`;
+    `"${escHtml(t.name)}" on <strong>${dateLabel}</strong> — that slot is busy.<br>Pick a new time:`;
 
   const occupied = getOccupiedHoursExclude(targetDate, taskId);
 
@@ -3318,7 +4715,7 @@ function updateAdjOccupiedHint(occupied) {
     const occupiedList = Array.from(occupied).sort((a, b) => a - b)
       .map(v => { const h=Math.floor(v),m=v%1===0?'00':'30'; return `${String(h).padStart(2,'0')}:${m}`; })
       .join('、');
-    hint.innerHTML = `⛔ 已占用：${occupiedList}`;
+    hint.innerHTML = `⛔ Busy: ${occupiedList}`;
   } else {
     hint.innerHTML = '';
   }
@@ -3346,7 +4743,7 @@ function confirmAdjustTime() {
   const newEndH   = newStartH + newDur;
 
   if (newDur <= 0) {
-    alert('请选择有效时长'); return;
+    alert('Choose a valid duration'); return;
   }
 
   const fmt = v => { const h=Math.floor(v),m=v%1===0?'00':'30'; return `${String(h).padStart(2,'0')}:${m}`; };
@@ -3354,7 +4751,7 @@ function confirmAdjustTime() {
   if (conflictTask) {
     const cs = fmt(conflictTask.startHour);
     const ce = fmt(conflictTask.startHour + (parseFloat(conflictTask.duration) || 1));
-    alert(`❌ 仍存在冲突！\n\n该时间段已被「${conflictTask.name}」占用\n（${cs} - ${ce}）\n\n请选择其它时间段。`);
+    alert(`❌ Still conflicting!\n\n"${conflictTask.name}" uses ${cs} - ${ce}\n\nPick another slot.`);
     return;
   }
 
@@ -3384,7 +4781,7 @@ function confirmAdjustTime() {
 
 function confirmModal() {
   const name = document.getElementById('modalTaskName').value.trim();
-  if (!name) { alert('请输入任务名称'); return; }
+  if (!name) { alert('Please enter a task name'); return; }
   const dateStr  = document.getElementById('modalDate').value;
   const level    = document.getElementById('modalLevel').value;
   const note     = document.getElementById('modalNote').value.trim();
@@ -3393,7 +4790,7 @@ function confirmModal() {
   const endH     = startH + dur;
 
   if (dur <= 0) {
-    alert('请选择有效时长');
+    alert('Choose a valid duration');
     return;
   }
 
@@ -3402,7 +4799,7 @@ function confirmModal() {
     const fmtH = v => { const h=Math.floor(v),m=v%1===0?'00':'30'; return `${String(h).padStart(2,'0')}:${m}`; };
     const cs = fmtH(conflictTask.startHour);
     const ce = fmtH(conflictTask.startHour + (parseFloat(conflictTask.duration) || 1));
-    alert(`❌ 时间冲突！\n\n该时间段已被「${conflictTask.name}」占用\n（${cs} - ${ce}）\n\n请选择其它时间段。`);
+    alert(`❌ Time conflict!\n\n"${conflictTask.name}" uses ${cs} - ${ce}\n\nPick another slot.`);
     return;
   }
 
@@ -3433,6 +4830,12 @@ function confirmModal() {
     subtasks: finalSubtasks,
   });
 
+  // If this schedule came from a Task Pool month-drop, remove the pool source item now.
+  if (modalFromPoolCtx && modalFromPoolCtx.poolId != null) {
+    taskPool = taskPool.filter(p => p.id !== modalFromPoolCtx.poolId);
+    modalFromPoolCtx.poolId = null;
+  }
+
   closeModal();
   modalEditDate = null;
   render(); saveData();
@@ -3452,6 +4855,9 @@ document.addEventListener('keydown', e => {
     }
     if (document.getElementById('editPlanOverlay').classList.contains('show')) {
       closeEditPlan();
+    }
+    if (document.getElementById('reviewOverlay') && document.getElementById('reviewOverlay').classList.contains('show')) {
+      closeMonthReview();
     }
   }
   if (e.key === 'Enter') {
@@ -3507,12 +4913,15 @@ function goToToday() {
   // 始终刷新日历，确保今日高亮正确
   renderCalendar();
   renderStats();
-  showToast(`📅 已回到 ${y}年${m}月${now.getDate()}日`, '#667eea');
+  showToast(`📅 Jumped to today (${now.getMonth() + 1}/${now.getDate()}/${y})`, '#667eea');
 }
 
 // ==================== 拖拽系统 ====================
 let draggedId     = null;
 let dragType      = null;
+// If the schedule modal was opened from a month drop of a pool item,
+// confirmModal() should remove that pool item after creating the calendar task.
+let modalFromPoolCtx = { poolId: null };
 
 function onMainTaskDragStart(e, id) {
   draggedId = id; dragType = 'main';
@@ -3527,6 +4936,18 @@ function onCalTaskDragStart(e, id) {
     let el = e.currentTarget;
     if (!el || !el.classList) {
       el = document.querySelector(`[data-task-id="${id}"]`);
+    }
+    if (el && el.classList) el.classList.add('dragging');
+  }, 0);
+}
+
+function onPoolTaskDragStart(e, id) {
+  draggedId = id; dragType = 'pool';
+  e.dataTransfer.effectAllowed = 'move';
+  setTimeout(() => {
+    let el = e.currentTarget;
+    if (!el || !el.classList) {
+      el = document.querySelector(`.pool-item[data-pool-id="${id}"]`);
     }
     if (el && el.classList) el.classList.add('dragging');
   }, 0);
@@ -3587,7 +5008,7 @@ function onTrashDrop(e) {
   draggedId = null; dragType = null;
 
   if (!task) return;
-  if (!confirm(`删除任务「${task.name}」？\n该操作不可恢复。`)) return;
+  if (!confirm(`Delete "${task.name}"?\nThis cannot be undone.`)) return;
 
   // 若任务已完成且绑定了 Plan，需要回退进度
   if (task.done && task.mainTaskId) {
@@ -3602,7 +5023,7 @@ function onTrashDrop(e) {
   calTasks = calTasks.filter(t => t.id !== task.id);
 
   render(); saveData(); refreshDayViewIfOpen();
-  showToast(`🗑 已删除「${task.name}」`, '#ff4d4f');
+  showToast(`🗑 Removed "${task.name}"`, '#ff4d4f');
 }
 
 function onDayCellDragOver(e, day) {
@@ -3672,6 +5093,29 @@ function onDropToDay(e, day) {
         if (cell) { cell.classList.add('drop-success'); setTimeout(() => cell.classList.remove('drop-success'), 500); }
       }, 10);
     }
+  } else if (dragType === 'pool') {
+    const p = taskPool.find(x => x.id === draggedId);
+    if (!p) { draggedId = null; dragType = null; return; }
+
+    // Open schedule modal for the selected date and prefill from pool task
+    openModal(targetDate);
+    document.getElementById('modalTaskName').value = p.name || '';
+    document.getElementById('modalLevel').value = p.level || 'yellow';
+    document.getElementById('modalNote').value = (p.note || '');
+
+    // Link goal (optional)
+    const planSel = document.getElementById('modalPlanId');
+    if (planSel) planSel.value = p.mainTaskId ? String(p.mainTaskId) : '';
+
+    // Prefill subtasks (names only; calendar subtasks are created as not-done on save)
+    const rawSubs = Array.isArray(p.subtasks) ? p.subtasks : [];
+    modalSubtasks = rawSubs.map((s, i) => {
+      const nm = typeof s === 'string' ? s : (s && s.name ? s.name : '');
+      return { id: i, name: nm };
+    }).filter(s => s.name.trim() !== '');
+    renderModalSubtaskList();
+
+    modalFromPoolCtx.poolId = p.id;
   }
 
   draggedId = null; dragType = null;
@@ -3683,10 +5127,10 @@ let pendingNewTask = null;
 function showAdjustTimeModalForNew(mainTaskSrc, targetDate, day) {
   pendingNewTask = { mainTaskSrc, targetDate, day };
   const [y, m, d] = targetDate.split('-').map(Number);
-  const dateLabel = `${y}年${m}月${d}日`;
+  const dateLabel = `${m}/${d}/${y}`;
 
   document.getElementById('adjMessage').innerHTML =
-    `「${escHtml(mainTaskSrc.name)}」添加到 <strong>${dateLabel}</strong> 时，该时间段已被占用。<br>请调整新的时间：`;
+    `"${escHtml(mainTaskSrc.name)}" on <strong>${dateLabel}</strong> — slot busy.<br>Pick a new time:`;
 
   const occupied = getOccupiedHoursExclude(targetDate, null);
 
@@ -3728,7 +5172,7 @@ function confirmAdjustTimeForNew() {
   const newEndH   = newStartH + newDur;
 
   if (newDur <= 0) {
-    alert('请选择有效时长'); return;
+    alert('Choose a valid duration'); return;
   }
 
   const [y, m, d] = targetDate.split('-').map(Number);
@@ -3790,7 +5234,7 @@ function renderDvPool() {
   const el = document.getElementById('dvPoolList');
   if (!el) return;
   if (!taskPool.length) {
-    el.innerHTML = '<div style="text-align:center;color:#bbb;padding:12px 0;font-size:11px;">暂无待安排任务<br>可在上方输入框添加</div>';
+    el.innerHTML = '<div style="text-align:center;color:#bbb;padding:12px 0;font-size:11px;">No pool tasks<br>Add above</div>';
     return;
   }
   el.innerHTML = taskPool.map(p => {
@@ -3902,7 +5346,7 @@ function onDvPoolDrop(e) {
   // 将已排期任务移回任务池
   const t = calTasks.find(task => task.id === draggedId);
   if (t) {
-    taskPool.push({ id: nextId++, name: t.name, level: t.level, note: t.note || '', mainTaskId: t.mainTaskId || null });
+    taskPool.push({ id: nextId++, name: t.name, level: t.level, note: t.note || '', mainTaskId: t.mainTaskId || null, subtasks: Array.isArray(t.subtasks) ? t.subtasks : [] });
     calTasks = calTasks.filter(task => task.id !== draggedId);
   }
   draggedId = null; dragType = null;
@@ -3922,7 +5366,7 @@ function renderPsSubtaskList() {
   const el = document.getElementById('psSubtaskList');
   if (!el) return;
   if (!psSubtasks.length) {
-    el.innerHTML = '<div style="font-size:11px;color:#bbb;padding:2px 0;">暂无子任务</div>';
+    el.innerHTML = '<div style="font-size:11px;color:#bbb;padding:2px 0;">No subtasks</div>';
     return;
   }
   el.innerHTML = psSubtasks.map((s, i) =>
@@ -3961,7 +5405,8 @@ function openPoolSchedule(poolId, dateStr, startH) {
 
   document.getElementById('poolScheduleTaskName').textContent = item.name;
   const [y, m, d] = dateStr.split('-').map(Number);
-  document.getElementById('poolScheduleDate').textContent = `${y}年${m}月${d}日`;
+  const monthNamesEn = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  document.getElementById('poolScheduleDate').textContent = `${monthNamesEn[m - 1]} ${d}, ${y}`;
 
   // 重要性预填（使用任务池中已有的 level，默认 yellow）
   const levelSel = document.getElementById('poolScheduleLevel');
@@ -4016,7 +5461,7 @@ function updatePoolSchedulePreview() {
   const conflict = checkTimeConflict30(poolScheduleCtx.dateStr, s, e);
   const conflictEl = document.getElementById('poolScheduleConflict');
   if (conflict) {
-    conflictEl.textContent = `⛔ 与「${conflict.name}」时间冲突`;
+    conflictEl.textContent = `⛔ Overlaps "${conflict.name}"`;
     conflictEl.style.display = 'block';
   } else {
     conflictEl.style.display = 'none';
@@ -4042,7 +5487,7 @@ function confirmPoolSchedule() {
   const conflict = checkTimeConflict30(dateStr, startH, endH);
   if (conflict) {
     const fmt = v => { const h=Math.floor(v),m=v%1===0?'00':'30'; return `${String(h).padStart(2,'0')}:${m}`; };
-    alert(`❌ 时间冲突！该时间段已被「${conflict.name}」占用\n(${fmt(conflict.startHour)} - ${fmt(conflict.startHour + parseFloat(conflict.duration))})\n请调整时间。`);
+    alert(`❌ Conflict: "${conflict.name}" uses ${fmt(conflict.startHour)} - ${fmt(conflict.startHour + parseFloat(conflict.duration))}\nAdjust the time.`);
     return;
   }
 
@@ -4111,10 +5556,62 @@ function exportData() {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-    showToast('✅ 数据导出成功', '#52c41a');
+    showToast('✅ Export saved', '#52c41a');
   } catch(e) {
-    alert('导出失败：' + e.message);
+    alert('Export failed: ' + e.message);
   }
+}
+
+function triggerImportData() {
+  const inp = document.getElementById('importPlannerFile');
+  if (!inp) return;
+  inp.value = '';
+  inp.click();
+}
+
+function validatePlannerImport(d) {
+  if (!d || typeof d !== 'object') return 'This file is not valid JSON.';
+  if (!Array.isArray(d.mainTasks) || !Array.isArray(d.calTasks)) {
+    return 'This file does not look like a Light Planner backup (missing goals or calendar tasks).';
+  }
+  return '';
+}
+
+function onImportPlannerFile(ev) {
+  const input = ev.target;
+  const file = input.files && input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function () {
+    try {
+      let text = reader.result;
+      if (typeof text === 'string' && text.charCodeAt(0) === 0xfeff) text = text.slice(1);
+      const d = JSON.parse(text);
+      const err = validatePlannerImport(d);
+      if (err) {
+        alert(err);
+        return;
+      }
+      if (!confirm('Replace all current planner data with this backup? This cannot be undone.')) {
+        return;
+      }
+      if (!Array.isArray(d.taskPool)) d.taskPool = [];
+      hydratePlannerState(d);
+      saveData();
+      render();
+      refreshDayViewIfOpen();
+      showToast('✅ Import complete', '#52c41a');
+    } catch (e) {
+      alert('Import failed: ' + (e && e.message ? e.message : String(e)));
+    } finally {
+      input.value = '';
+    }
+  };
+  reader.onerror = function () {
+    alert('Could not read file.');
+    input.value = '';
+  };
+  reader.readAsText(file, 'UTF-8');
 }
 
 // ==================== 数据持久化 ====================
@@ -4126,6 +5623,39 @@ function saveData() {
   } catch(e) { console.warn('localStorage write failed', e); }
 }
 
+/** Apply parsed planner payload (same rules as loading from localStorage). */
+function hydratePlannerState(d) {
+  if (!d || typeof d !== 'object') return;
+  if (d.mainTasks) {
+    mainTasks = d.mainTasks.map(m => {
+      if (!m.deadline) m.deadline = null;
+      // 兼容旧数据：Plan 阶段目标字段
+      if (!Array.isArray(m.planSubtasks)) m.planSubtasks = [];
+      return m;
+    });
+  }
+  if (d.calTasks) {
+    calTasks = d.calTasks.map(t => {
+      if (t.duration === undefined && t.startHour !== undefined && t.endHour !== undefined) {
+        t.duration = Math.max(0.5, t.endHour - t.startHour);
+      }
+      if (t.duration === undefined) t.duration = 1;
+      if (!Array.isArray(t.subtasks)) t.subtasks = [];
+      return t;
+    });
+  }
+  if (Array.isArray(d.taskPool)) {
+    // 兼容旧数据：任务池执行步骤字段
+    taskPool = d.taskPool.map(p => {
+      if (!Array.isArray(p.subtasks)) p.subtasks = [];
+      return p;
+    });
+  }
+  if (d.nextId) nextId = d.nextId;
+  if (d.currentYear) currentYear = d.currentYear;
+  if (d.currentMonth) currentMonth = d.currentMonth;
+}
+
 function loadData() {
   try {
     const raw = localStorage.getItem('calendar_v4')
@@ -4133,34 +5663,7 @@ function loadData() {
              || localStorage.getItem('calendar_v2');
     if (!raw) return;
     const d = JSON.parse(raw);
-    if (d.mainTasks) {
-      mainTasks = d.mainTasks.map(m => {
-        if (!m.deadline) m.deadline = null;
-        // 兼容旧数据：Plan 阶段目标字段
-        if (!Array.isArray(m.planSubtasks)) m.planSubtasks = [];
-        return m;
-      });
-    }
-    if (d.calTasks) {
-      calTasks = d.calTasks.map(t => {
-        if (t.duration === undefined && t.startHour !== undefined && t.endHour !== undefined) {
-          t.duration = Math.max(0.5, t.endHour - t.startHour);
-        }
-        if (t.duration === undefined) t.duration = 1;
-        if (!Array.isArray(t.subtasks)) t.subtasks = [];
-        return t;
-      });
-    }
-    if (Array.isArray(d.taskPool)) {
-      // 兼容旧数据：任务池执行步骤字段
-      taskPool = d.taskPool.map(p => {
-        if (!Array.isArray(p.subtasks)) p.subtasks = [];
-        return p;
-      });
-    }
-    if (d.nextId)       nextId       = d.nextId;
-    if (d.currentYear)  currentYear  = d.currentYear;
-    if (d.currentMonth) currentMonth = d.currentMonth;
+    hydratePlannerState(d);
     render();
   } catch(e) { console.warn('localStorage read failed', e); }
 }
