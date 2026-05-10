@@ -1219,6 +1219,166 @@ body {
 .header-user { display: flex; align-items: center; gap: 6px; cursor: pointer; }
 .header-user-name { font-size: 13px; font-weight: 500; color: var(--text); white-space: nowrap; }
 
+/* ===== Supabase Auth (account UI only) ===== */
+.header-auth-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 3px;
+  max-width: 200px;
+}
+.auth-status-line {
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--text-3);
+  line-height: 1.25;
+  text-align: right;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 190px;
+}
+.auth-account-btn {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--accent);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 2px 0;
+  font-family: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.auth-account-btn:hover { opacity: 0.82; }
+.cloud-sync-actions {
+  display: none;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+  max-width: 260px;
+}
+.cloud-sync-btn {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 5px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--accent-mid);
+  background: linear-gradient(135deg, var(--accent), #a78bfa);
+  color: white;
+  cursor: pointer;
+  font-family: inherit;
+  white-space: nowrap;
+  line-height: 1.2;
+}
+.cloud-sync-btn:hover { opacity: 0.9; }
+.cloud-sync-btn.cloud-sync-btn-secondary {
+  background: var(--surface);
+  color: var(--text);
+  border-color: var(--border);
+}
+.cloud-sync-btn.cloud-sync-btn-secondary:hover {
+  background: var(--accent-light);
+  border-color: var(--accent-mid);
+  color: var(--accent);
+}
+.auth-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  z-index: 10002;
+  align-items: center;
+  justify-content: center;
+}
+.auth-overlay.show { display: flex; }
+.auth-modal {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 22px;
+  width: 380px;
+  max-width: 94vw;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.14);
+  animation: slideUp 0.25s ease;
+}
+.auth-modal h3 {
+  font-size: 17px;
+  margin-bottom: 8px;
+  color: var(--text);
+}
+.auth-modal-hint {
+  font-size: 12px;
+  color: var(--text-3);
+  margin-bottom: 14px;
+  line-height: 1.45;
+}
+.auth-modal label {
+  font-size: 12px;
+  color: var(--text-2);
+  display: block;
+  margin-bottom: 4px;
+  margin-top: 10px;
+}
+.auth-modal input[type="email"],
+.auth-modal input[type="password"] {
+  width: 100%;
+  padding: 9px 11px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  font-size: 14px;
+  outline: none;
+  font-family: inherit;
+  background: var(--surface);
+  color: var(--text);
+}
+.auth-modal input:focus { border-color: var(--accent-mid); }
+.auth-modal-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 18px;
+  justify-content: flex-end;
+}
+.auth-modal-actions button {
+  padding: 9px 14px;
+  border-radius: 9px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  border: none;
+  transition: opacity 0.15s;
+}
+.auth-modal-actions button:hover { opacity: 0.88; }
+.auth-btn-close {
+  background: var(--surface);
+  color: var(--text-2);
+  border: 1px solid var(--border) !important;
+}
+.auth-btn-login {
+  background: linear-gradient(135deg, var(--accent), #a78bfa);
+  color: white;
+}
+.auth-btn-signup {
+  background: var(--accent-light);
+  color: var(--accent);
+  border: 1px solid var(--accent-mid) !important;
+}
+.auth-logged-email {
+  font-size: 13px;
+  color: var(--text);
+  word-break: break-all;
+  margin-bottom: 14px;
+}
+.auth-btn-logout {
+  background: #fef2f2;
+  color: #b91c1c;
+  border: 1px solid #fecaca !important;
+}
+
 /* ===== MAIN BODY ===== */
 .app-body {
   display: flex;
@@ -2022,9 +2182,13 @@ body {
     <div class="header-icon-btn" title="Notifications (placeholder)">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
     </div>
-    <div class="header-user">
-      <div class="avatar">LP</div>
-      <span class="header-user-name">Learner</span>
+    <div id="cloudSyncActions" class="cloud-sync-actions" style="display:none;" aria-hidden="true">
+      <button type="button" class="cloud-sync-btn" onclick="backupPlannerToCloud()">Backup to Cloud</button>
+      <button type="button" class="cloud-sync-btn cloud-sync-btn-secondary" onclick="restorePlannerFromCloud()">Restore from Cloud</button>
+    </div>
+    <div class="header-auth-wrap">
+      <span class="auth-status-line" id="authStatusLabel" title="">Local mode</span>
+      <button type="button" class="auth-account-btn" id="authOpenBtn" onclick="openAuthModal()">Account</button>
     </div>
   </div>
 </div>
@@ -2533,6 +2697,33 @@ body {
   </div>
 </div>
 
+<!-- Supabase Auth modal (planner data stays local until sync is added) -->
+<div class="auth-overlay" id="authOverlay" onclick="if(event.target===this)closeAuthModal()" aria-hidden="true">
+  <div class="auth-modal" role="dialog" aria-labelledby="authModalTitle" aria-modal="true" onclick="event.stopPropagation()">
+    <h3 id="authModalTitle">Account</h3>
+    <p class="auth-modal-hint">Planner data stays on this device for now. Sign in prepares your account for future cloud sync.</p>
+    <div id="authModalLoggedIn" style="display:none;">
+      <div class="auth-logged-email" id="authModalLoggedEmail"></div>
+      <div class="auth-modal-actions">
+        <button type="button" class="auth-btn-close" onclick="closeAuthModal()">Close</button>
+        <button type="button" class="auth-btn-logout" onclick="authLogout()">Log out</button>
+      </div>
+    </div>
+    <div id="authModalForm">
+      <label for="authEmail">Email</label>
+      <input type="email" id="authEmail" autocomplete="username" placeholder="you@example.com" />
+      <label for="authPassword">Password</label>
+      <input type="password" id="authPassword" autocomplete="current-password" placeholder="••••••••" onkeydown="if(event.key==='Enter'){event.preventDefault();authLogin();}" />
+      <div class="auth-modal-actions">
+        <button type="button" class="auth-btn-close" onclick="closeAuthModal()">Close</button>
+        <button type="button" class="auth-btn-login" onclick="authLogin()">Log in</button>
+        <button type="button" class="auth-btn-signup" onclick="authSignup()">Sign up</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
 // =================================================================
 //   数据结构
@@ -2572,6 +2763,364 @@ let adjustTimeCtx = {
   originalDuration: 1,
   dragSource: null,
 };
+
+// ----- Supabase client, Auth UI & manual cloud backup (localStorage calendar_v4 unchanged) -----
+const SUPABASE_URL = 'https://xiewggtiungczspimrpk.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhpZXdnZ3RpdW5nY3pzcGltcnBrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg0MzEzNDMsImV4cCI6MjA5NDAwNzM0M30.dzVVq5Q1RLPILxmGAXFGTudLpZKtpcBX5T_FlsC-u-E';
+let sb = null;
+(function setupSupabaseClient() {
+  try {
+    const lib = typeof supabase !== 'undefined' ? supabase : window.supabase;
+    if (lib && typeof lib.createClient === 'function') {
+      sb = lib.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    }
+  } catch (err) {
+    console.warn('Supabase client init failed', err);
+  }
+})();
+
+function updateAuthStatus(session) {
+  const statusEl = document.getElementById('authStatusLabel');
+  if (!statusEl) return;
+  const email = session && session.user && session.user.email;
+  if (email) {
+    statusEl.textContent = 'Logged in as ' + email;
+    statusEl.title = email;
+  } else {
+    statusEl.textContent = 'Local mode';
+    statusEl.title = '';
+  }
+  const cloudWrap = document.getElementById('cloudSyncActions');
+  if (cloudWrap) {
+    const showCloud = !!(sb && session && session.user);
+    cloudWrap.style.display = showCloud ? 'flex' : 'none';
+    cloudWrap.setAttribute('aria-hidden', showCloud ? 'false' : 'true');
+  }
+}
+
+function buildPlannerPayloadForCloud() {
+  return {
+    mainTasks,
+    calTasks,
+    taskPool,
+    nextId,
+    currentYear,
+    currentMonth,
+  };
+}
+
+function isCloudPlannerPayload(p) {
+  return p && typeof p === 'object' && Array.isArray(p.mainTasks) && Array.isArray(p.calTasks);
+}
+
+const CLOUD_UPLOAD_DEBOUNCE_MS = 1200;
+let cloudUploadTimer = null;
+/** When true, saveData() skips scheduling debounced cloud upload (e.g. after loading from cloud). */
+let suppressDebouncedCloudUpload = false;
+let loginCloudBootstrapUserId = null;
+let loginCloudBootstrapInFlight = false;
+
+function cancelDebouncedCloudUpload() {
+  if (cloudUploadTimer) {
+    clearTimeout(cloudUploadTimer);
+    cloudUploadTimer = null;
+  }
+}
+
+async function upsertPlannerCloudRow(session, payload) {
+  return sb.from('planner_data').upsert(
+    { user_id: session.user.id, payload },
+    { onConflict: 'user_id' }
+  );
+}
+
+/**
+ * Immediate cloud upsert; clears any pending debounced upload first.
+ * On failure, localStorage is unaffected (caller persists locally separately).
+ */
+async function flushCloudUploadNow(options) {
+  const silent = options && options.silent;
+  const toastSuccess = options && options.toastSuccess;
+  cancelDebouncedCloudUpload();
+  if (!sb) return { ok: false };
+  const { data: { session }, error: sErr } = await sb.auth.getSession();
+  if (sErr || !session || !session.user) return { ok: false };
+  const payload = buildPlannerPayloadForCloud();
+  const { error } = await upsertPlannerCloudRow(session, payload);
+  if (error) {
+    if (!silent) console.warn('planner_data upsert', error);
+    return { ok: false, error };
+  }
+  if (toastSuccess) showToast('Backed up to cloud', '#52c41a');
+  return { ok: true };
+}
+
+function scheduleDebouncedCloudUpload() {
+  if (!sb || suppressDebouncedCloudUpload) return;
+  if (cloudUploadTimer) clearTimeout(cloudUploadTimer);
+  cloudUploadTimer = setTimeout(() => {
+    cloudUploadTimer = null;
+    (async () => {
+      const { data: { session } } = await sb.auth.getSession();
+      if (!session || !session.user) return;
+      const payload = buildPlannerPayloadForCloud();
+      const { error } = await upsertPlannerCloudRow(session, payload);
+      if (error) console.warn('Auto cloud sync failed (local data is safe)', error);
+    })();
+  }, CLOUD_UPLOAD_DEBOUNCE_MS);
+}
+
+async function backupPlannerToCloud() {
+  if (!sb) {
+    showToast('Cloud unavailable', '#ef4444');
+    return;
+  }
+  const { data: { session }, error: sessErr } = await sb.auth.getSession();
+  if (sessErr || !session || !session.user) {
+    showToast('Log in to back up to the cloud', '#ef4444');
+    return;
+  }
+  const { ok, error } = await flushCloudUploadNow({ toastSuccess: true });
+  if (!ok) {
+    showToast((error && error.message) || 'Backup failed', '#ef4444');
+  }
+}
+
+async function restorePlannerFromCloud() {
+  if (!sb) {
+    showToast('Cloud unavailable', '#ef4444');
+    return;
+  }
+  const { data: { session }, error: sessErr } = await sb.auth.getSession();
+  if (sessErr || !session || !session.user) {
+    showToast('Log in to restore from the cloud', '#ef4444');
+    return;
+  }
+  const { data, error } = await sb.from('planner_data')
+    .select('payload')
+    .eq('user_id', session.user.id)
+    .maybeSingle();
+  if (error) {
+    console.warn('planner_data select', error);
+    showToast(error.message || 'Could not load cloud backup', '#ef4444');
+    return;
+  }
+  const rawPayload = data && data.payload;
+  if (!isCloudPlannerPayload(rawPayload)) {
+    showToast('No cloud backup found yet.', '#f59e0b');
+    return;
+  }
+  if (!confirm('Replace all planner data on this device with your cloud backup? This cannot be undone.')) {
+    return;
+  }
+  const merged = Object.assign({}, rawPayload);
+  if (!Array.isArray(merged.taskPool)) merged.taskPool = [];
+  suppressDebouncedCloudUpload = true;
+  try {
+    hydratePlannerState(merged);
+    saveData();
+    render();
+  } finally {
+    suppressDebouncedCloudUpload = false;
+  }
+  showToast('Restored from cloud', '#52c41a');
+}
+
+function syncAuthModal(session) {
+  const overlay = document.getElementById('authOverlay');
+  if (!overlay || !overlay.classList.contains('show')) return;
+  const logged = document.getElementById('authModalLoggedIn');
+  const form = document.getElementById('authModalForm');
+  const emailDisp = document.getElementById('authModalLoggedEmail');
+  const email = session && session.user && session.user.email;
+  if (email) {
+    if (logged) logged.style.display = 'block';
+    if (form) form.style.display = 'none';
+    if (emailDisp) emailDisp.textContent = email;
+  } else {
+    if (logged) logged.style.display = 'none';
+    if (form) form.style.display = 'block';
+  }
+}
+
+function applyAuthSession(session) {
+  updateAuthStatus(session);
+  syncAuthModal(session);
+}
+
+function openAuthModal() {
+  const overlay = document.getElementById('authOverlay');
+  if (!overlay) return;
+  overlay.classList.add('show');
+  overlay.setAttribute('aria-hidden', 'false');
+  if (!sb) {
+    showToast('Account unavailable (Supabase did not load)', '#ef4444');
+    return;
+  }
+  sb.auth.getSession().then(({ data: { session } }) => applyAuthSession(session));
+}
+
+function closeAuthModal() {
+  const overlay = document.getElementById('authOverlay');
+  if (!overlay) return;
+  overlay.classList.remove('show');
+  overlay.setAttribute('aria-hidden', 'true');
+}
+
+async function authLogin() {
+  if (!sb) {
+    showToast('Supabase not loaded', '#ef4444');
+    return;
+  }
+  const emailEl = document.getElementById('authEmail');
+  const passEl = document.getElementById('authPassword');
+  const email = emailEl ? emailEl.value.trim() : '';
+  const password = passEl ? passEl.value : '';
+  if (!email || !password) {
+    showToast('Enter email and password', '#ef4444');
+    return;
+  }
+  const { error } = await sb.auth.signInWithPassword({ email, password });
+  if (error) {
+    showToast(error.message || 'Login failed', '#ef4444');
+    return;
+  }
+  showToast('Logged in', '#52c41a');
+}
+
+async function authSignup() {
+  if (!sb) {
+    showToast('Supabase not loaded', '#ef4444');
+    return;
+  }
+  const emailEl = document.getElementById('authEmail');
+  const passEl = document.getElementById('authPassword');
+  const email = emailEl ? emailEl.value.trim() : '';
+  const password = passEl ? passEl.value : '';
+  if (!email || !password) {
+    showToast('Enter email and password', '#ef4444');
+    return;
+  }
+  const { data, error } = await sb.auth.signUp({ email, password });
+  if (error) {
+    showToast(error.message || 'Sign up failed', '#ef4444');
+    return;
+  }
+  if (data.session) {
+    showToast('Signed up — you are logged in', '#52c41a');
+  } else {
+    showToast('Sign up OK — confirm your email if your project requires it, then log in', '#52c41a');
+  }
+}
+
+function resetPlannerToLocalEmptyState() {
+  const now = new Date();
+  currentYear = now.getFullYear();
+  currentMonth = now.getMonth();
+  mainTasks = [];
+  calTasks = [];
+  taskPool = [];
+  nextId = 1;
+  poolFilterLevel = 'all';
+  modalSubtasks = [];
+  modalEditDate = null;
+  adjustTimeCtx = {
+    taskId: null,
+    targetDate: null,
+    originalStart: 0,
+    originalDuration: 1,
+    dragSource: null,
+  };
+}
+
+async function handleLoginCloudBootstrap(session) {
+  if (!session || !session.user || !sb || loginCloudBootstrapInFlight) return;
+  const uid = session.user.id;
+  if (loginCloudBootstrapUserId === uid) return;
+  loginCloudBootstrapInFlight = true;
+  try {
+    const { data, error } = await sb.from('planner_data')
+      .select('payload')
+      .eq('user_id', uid)
+      .maybeSingle();
+    if (error) {
+      console.warn('Login cloud check failed', error);
+      return;
+    }
+    const rawPayload = data && data.payload;
+    if (isCloudPlannerPayload(rawPayload)) {
+      suppressDebouncedCloudUpload = true;
+      try {
+        const merged = Object.assign({}, rawPayload);
+        if (!Array.isArray(merged.taskPool)) merged.taskPool = [];
+        hydratePlannerState(merged);
+        saveData();
+        render();
+        refreshDayViewIfOpen();
+        loginCloudBootstrapUserId = uid;
+      } finally {
+        suppressDebouncedCloudUpload = false;
+      }
+    } else {
+      await flushCloudUploadNow({ silent: true });
+      loginCloudBootstrapUserId = uid;
+    }
+  } finally {
+    loginCloudBootstrapInFlight = false;
+  }
+}
+
+async function authLogout() {
+  if (!sb) return;
+  suppressDebouncedCloudUpload = true;
+  cancelDebouncedCloudUpload();
+  let backupOk = true;
+  try {
+    const { data: { session: preSession } } = await sb.auth.getSession();
+    if (preSession && preSession.user) {
+      const r = await flushCloudUploadNow({ silent: true });
+      backupOk = !!r.ok;
+    }
+    const { error } = await sb.auth.signOut();
+    if (error) {
+      showToast(error.message || 'Log out failed', '#ef4444');
+      return;
+    }
+  } finally {
+    suppressDebouncedCloudUpload = false;
+  }
+
+  try {
+    localStorage.removeItem('calendar_v4');
+  } catch (e) {
+    console.warn('localStorage remove failed', e);
+  }
+  loginCloudBootstrapUserId = null;
+  resetPlannerToLocalEmptyState();
+  render();
+  refreshDayViewIfOpen();
+  closeAuthModal();
+  if (!backupOk) {
+    showToast('Logged out — last cloud backup may have failed (local copy cleared)', '#f59e0b');
+  } else {
+    showToast('Logged out', '#52c41a');
+  }
+}
+
+if (sb) {
+  sb.auth.getSession().then(({ data: { session } }) => updateAuthStatus(session));
+  sb.auth.onAuthStateChange((event, session) => {
+    updateAuthStatus(session);
+    syncAuthModal(session);
+    if (event === 'SIGNED_OUT') {
+      loginCloudBootstrapUserId = null;
+      cancelDebouncedCloudUpload();
+    }
+    if ((event === 'INITIAL_SESSION' || event === 'SIGNED_IN') && session) {
+      setTimeout(() => handleLoginCloudBootstrap(session), 0);
+    }
+  });
+}
 
 // 颜色配置
 const levelConfig = {
@@ -4563,7 +5112,7 @@ function openModal(dateStr, presetHour) {
   // 清空绑定Plan选择器
   const planSel = document.getElementById('modalPlanId');
   if (planSel) {
-    planSel.innerHTML = '<option value="">— 不绑定 Plan —</option>';
+    planSel.innerHTML = '<option value="">— No goal —</option>';
     mainTasks.forEach(m => {
       const opt = document.createElement('option');
       opt.value = m.id;
@@ -5268,7 +5817,7 @@ function renderDvPool() {
 function initDvPoolPlanSelect() {
   const sel = document.getElementById('dvPoolNewPlan');
   if (!sel) return;
-  sel.innerHTML = '<option value="">— 不绑定 Plan —</option>';
+  sel.innerHTML = '<option value="">— No goal —</option>';
   mainTasks.forEach(m => {
     const opt = document.createElement('option');
     opt.value = m.id;
@@ -5621,6 +6170,9 @@ function saveData() {
       mainTasks, calTasks, taskPool, nextId, currentYear, currentMonth
     }));
   } catch(e) { console.warn('localStorage write failed', e); }
+  if (!suppressDebouncedCloudUpload) {
+    scheduleDebouncedCloudUpload();
+  }
 }
 
 /** Apply parsed planner payload (same rules as loading from localStorage). */
